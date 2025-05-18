@@ -19,7 +19,7 @@ jobs:
         with:
           openai_light_model: gpt-4o
           openai_heavy_model: gpt-4o
-          language: ja-JP
+          language: ja
           system_message: |
             あなたは親切で丁寧なソフトウェアエンジニアです。初学者にも分かりやすく日本語でレビューしてください。
             初学者にも分かりやすく、やさしい言葉でコードレビューをしてください。
