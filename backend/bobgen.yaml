@@ -1,0 +1,6 @@
+psql:
+  # dsn: "postgres://ユーザー名:パスワード@ホスト:ポート/データベース名?sslmode=disable"
+  dsn: "postgres://yondeco:yondeco@localhost:5432/yondeco?sslmode=disable"
+output: "models"
+pkgname: "models"
+no_factory: true
