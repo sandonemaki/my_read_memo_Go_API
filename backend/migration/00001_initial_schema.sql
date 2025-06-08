@@ -8,6 +8,20 @@ CREATE TABLE users (
   updated_at timestamp DEFAULT statement_timestamp() NOT NULL
 );
 
+CREATE TABLE authors (
+  id BIGSERIAL PRIMARY KEY NOT NULL,
+  name VARCHAR(100) NOT NULL DEFAULT '',
+  created_at timestamp DEFAULT statement_timestamp() NOT NULL,
+  updated_at timestamp DEFAULT statement_timestamp() NOT NULL
+);
+
+CREATE TABLE publishers (
+  id BIGSERIAL PRIMARY KEY NOT NULL,
+  name VARCHAR(100) NOT NULL DEFAULT '',
+  created_at timestamp DEFAULT statement_timestamp() NOT NULL,
+  updated_at timestamp DEFAULT statement_timestamp() NOT NULL
+);
+
 CREATE TABLE master_books (
   id BIGSERIAL PRIMARY KEY NOT NULL,
   isbn VARCHAR(13) NOT NULL DEFAULT '',
@@ -21,20 +35,6 @@ CREATE TABLE master_books (
   published_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
   FOREIGN KEY (author_id) REFERENCES authors(id),
   FOREIGN KEY (publisher_id) REFERENCES publishers(id)
-);
-
-CREATE TABLE authors (
-  id BIGSERIAL PRIMARY KEY NOT NULL,
-  name VARCHAR(100) NOT NULL DEFAULT '',
-  created_at timestamp DEFAULT statement_timestamp() NOT NULL,
-  updated_at timestamp DEFAULT statement_timestamp() NOT NULL
-);
-
-CREATE TABLE publishers (
-  id BIGSERIAL PRIMARY KEY NOT NULL,
-  name VARCHAR(100) NOT NULL DEFAULT '',
-  created_at timestamp DEFAULT statement_timestamp() NOT NULL,
-  updated_at timestamp DEFAULT statement_timestamp() NOT NULL
 );
 CREATE TABLE user_book_logs (
   id BIGSERIAL PRIMARY KEY NOT NULL,
