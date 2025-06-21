@@ -10,6 +10,7 @@ require (
 
 require (
 	github.com/aarondl/json v0.0.0-20221020222930-8b0db17ef1bf // indirect
+	github.com/oklog/ulid/v2 v2.1.1 // indirect
 	github.com/qdm12/reprint v0.0.0-20200326205758-722754a53494 // indirect
 	github.com/stephenafamo/scan v0.6.2 // indirect
 )
