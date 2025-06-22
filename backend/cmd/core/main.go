@@ -16,7 +16,5 @@ func main() {
 	log.Println("サーバーを起動します。ポート：8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatalf("サーバー起動に失敗しました: %v", err)
-	} else {
-		log.Println("サーバーが正常に起動しました。")
 	}
 }
