@@ -1,6 +1,9 @@
 psql:
-  # dsn: "postgres://ユーザー名:パスワード@ホスト:ポート/データベース名?sslmode=disable"
+  # DSN設定（PostgreSQL接続情報）
   dsn: "postgres://yondeco:yondeco@localhost:5432/yondeco?sslmode=disable"
-output: "models"
-pkgname: "models"
-no_factory: true
+  # 出力先ディレクトリ（プロジェクトルートからの相対パス）
+  output: "./pkg/dbmodels"
+  # パッケージ名
+  pkgname: "dbmodels"
+  # ファクトリーコードの生成を無効化
+  no_factory: true

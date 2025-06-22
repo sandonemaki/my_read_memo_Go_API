@@ -8,3 +8,8 @@ build:
 
 mockgen:
 	@ $(foreach file,$(USECASE_IFACES), echo $(file) && mockgen -source $(file) -destination $(BACKEND_ROOT)/$(SERVICE_NAME)/usecase/mock/$(shell basename $(file)) || exit;)
+
+bobinstall:
+	go install github.com/stephenafamo/bob/gen/bobgen-psql@v0.38.0
+
+bobgen-to-pkg: bobgen-psql -c bobgen.yaml
