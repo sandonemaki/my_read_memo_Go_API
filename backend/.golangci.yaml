@@ -1,0 +1,10 @@
+version: "2"
+run:
+  go: '1.23'
+linters:
+  exclusions:
+    paths:
+      - pkg/dbmodels/.*
+      - testutil/.*
+      - mock.go
+    generated: strict
