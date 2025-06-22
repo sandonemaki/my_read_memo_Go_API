@@ -31,6 +31,6 @@ go.work
 coverage.txt
 vendor
 bin/core
-serviceAccount.json
+yondecoServiceAccount.json
 .envrc
 .DS_Store
