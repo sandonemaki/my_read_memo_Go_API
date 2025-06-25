@@ -180,6 +180,10 @@ func ensureCreatableKindleHighlight(m *models.KindleHighlightSetter) {
 		val := random_int64(nil)
 		m.MasterBookID = &val
 	}
+	if m.LastSyncedAt == nil {
+		val := random_time_Time(nil)
+		m.LastSyncedAt = &val
+	}
 }
 
 // insertOptRels creates and inserts any optional the relationships on *models.KindleHighlight

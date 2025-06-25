@@ -5,6 +5,7 @@ package factory
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 	"time"
 
@@ -43,7 +44,7 @@ type MasterBookTemplate struct {
 	TotalPage   func() int32
 	CreatedAt   func() time.Time
 	UpdatedAt   func() time.Time
-	PublishedAt func() time.Time
+	PublishedAt func() sql.Null[time.Time]
 
 	r masterBookR
 	f *Factory
@@ -825,14 +826,14 @@ func (m masterBookMods) RandomUpdatedAt(f *faker.Faker) MasterBookMod {
 }
 
 // Set the model columns to this value
-func (m masterBookMods) PublishedAt(val time.Time) MasterBookMod {
+func (m masterBookMods) PublishedAt(val sql.Null[time.Time]) MasterBookMod {
 	return MasterBookModFunc(func(_ context.Context, o *MasterBookTemplate) {
-		o.PublishedAt = func() time.Time { return val }
+		o.PublishedAt = func() sql.Null[time.Time] { return val }
 	})
 }
 
 // Set the Column from the function
-func (m masterBookMods) PublishedAtFunc(f func() time.Time) MasterBookMod {
+func (m masterBookMods) PublishedAtFunc(f func() sql.Null[time.Time]) MasterBookMod {
 	return MasterBookModFunc(func(_ context.Context, o *MasterBookTemplate) {
 		o.PublishedAt = f
 	})
@@ -847,10 +848,32 @@ func (m masterBookMods) UnsetPublishedAt() MasterBookMod {
 
 // Generates a random value for the column using the given faker
 // if faker is nil, a default faker is used
+// The generated value is sometimes null
 func (m masterBookMods) RandomPublishedAt(f *faker.Faker) MasterBookMod {
 	return MasterBookModFunc(func(_ context.Context, o *MasterBookTemplate) {
-		o.PublishedAt = func() time.Time {
-			return random_time_Time(f)
+		o.PublishedAt = func() sql.Null[time.Time] {
+			if f == nil {
+				f = &defaultFaker
+			}
+
+			val := random_time_Time(f)
+			return sql.Null[time.Time]{V: val, Valid: f.Bool()}
+		}
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+// The generated value is never null
+func (m masterBookMods) RandomPublishedAtNotNull(f *faker.Faker) MasterBookMod {
+	return MasterBookModFunc(func(_ context.Context, o *MasterBookTemplate) {
+		o.PublishedAt = func() sql.Null[time.Time] {
+			if f == nil {
+				f = &defaultFaker
+			}
+
+			val := random_time_Time(f)
+			return sql.Null[time.Time]{V: val, Valid: true}
 		}
 	})
 }

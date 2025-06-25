@@ -156,6 +156,7 @@ var ColumnNames = struct {
 		DeletedAt: "deleted_at",
 		CreatedAt: "created_at",
 		UpdatedAt: "updated_at",
+		UID:       "uid",
 	},
 }
 

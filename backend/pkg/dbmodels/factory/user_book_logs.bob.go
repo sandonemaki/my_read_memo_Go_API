@@ -187,6 +187,10 @@ func ensureCreatableUserBookLog(m *models.UserBookLogSetter) {
 		val := random_int64(nil)
 		m.MasterBookID = &val
 	}
+	if m.RegisteredAt == nil {
+		val := random_time_Time(nil)
+		m.RegisteredAt = &val
+	}
 }
 
 // insertOptRels creates and inserts any optional the relationships on *models.UserBookLog

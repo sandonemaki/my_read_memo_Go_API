@@ -5,6 +5,7 @@ package dbmodels
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"io"
 	"time"
@@ -23,16 +24,16 @@ import (
 
 // MasterBook is an object representing the database table.
 type MasterBook struct {
-	ID          int64     `db:"id,pk" `
-	Isbn        string    `db:"isbn" `
-	CoverS3URL  string    `db:"cover_s3_url" `
-	Title       string    `db:"title" `
-	AuthorID    int64     `db:"author_id" `
-	PublisherID int64     `db:"publisher_id" `
-	TotalPage   int32     `db:"total_page" `
-	CreatedAt   time.Time `db:"created_at" `
-	UpdatedAt   time.Time `db:"updated_at" `
-	PublishedAt time.Time `db:"published_at" `
+	ID          int64               `db:"id,pk" `
+	Isbn        string              `db:"isbn" `
+	CoverS3URL  string              `db:"cover_s3_url" `
+	Title       string              `db:"title" `
+	AuthorID    int64               `db:"author_id" `
+	PublisherID int64               `db:"publisher_id" `
+	TotalPage   int32               `db:"total_page" `
+	CreatedAt   time.Time           `db:"created_at" `
+	UpdatedAt   time.Time           `db:"updated_at" `
+	PublishedAt sql.Null[time.Time] `db:"published_at" `
 
 	R masterBookR `db:"-" `
 }
@@ -121,7 +122,7 @@ type masterBookWhere[Q psql.Filterable] struct {
 	TotalPage   psql.WhereMod[Q, int32]
 	CreatedAt   psql.WhereMod[Q, time.Time]
 	UpdatedAt   psql.WhereMod[Q, time.Time]
-	PublishedAt psql.WhereMod[Q, time.Time]
+	PublishedAt psql.WhereNullMod[Q, time.Time]
 }
 
 func (masterBookWhere[Q]) AliasedAs(alias string) masterBookWhere[Q] {
@@ -139,7 +140,7 @@ func buildMasterBookWhere[Q psql.Filterable](cols masterBookColumns) masterBookW
 		TotalPage:   psql.Where[Q, int32](cols.TotalPage),
 		CreatedAt:   psql.Where[Q, time.Time](cols.CreatedAt),
 		UpdatedAt:   psql.Where[Q, time.Time](cols.UpdatedAt),
-		PublishedAt: psql.Where[Q, time.Time](cols.PublishedAt),
+		PublishedAt: psql.WhereNull[Q, time.Time](cols.PublishedAt),
 	}
 }
 
@@ -160,16 +161,16 @@ type masterBookErrors struct {
 // All values are optional, and do not have to be set
 // Generated columns are not included
 type MasterBookSetter struct {
-	ID          *int64     `db:"id,pk" `
-	Isbn        *string    `db:"isbn" `
-	CoverS3URL  *string    `db:"cover_s3_url" `
-	Title       *string    `db:"title" `
-	AuthorID    *int64     `db:"author_id" `
-	PublisherID *int64     `db:"publisher_id" `
-	TotalPage   *int32     `db:"total_page" `
-	CreatedAt   *time.Time `db:"created_at" `
-	UpdatedAt   *time.Time `db:"updated_at" `
-	PublishedAt *time.Time `db:"published_at" `
+	ID          *int64               `db:"id,pk" `
+	Isbn        *string              `db:"isbn" `
+	CoverS3URL  *string              `db:"cover_s3_url" `
+	Title       *string              `db:"title" `
+	AuthorID    *int64               `db:"author_id" `
+	PublisherID *int64               `db:"publisher_id" `
+	TotalPage   *int32               `db:"total_page" `
+	CreatedAt   *time.Time           `db:"created_at" `
+	UpdatedAt   *time.Time           `db:"updated_at" `
+	PublishedAt *sql.Null[time.Time] `db:"published_at" `
 }
 
 func (s MasterBookSetter) SetColumns() []string {
