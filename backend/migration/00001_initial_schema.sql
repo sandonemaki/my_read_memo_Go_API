@@ -32,7 +32,7 @@ CREATE TABLE master_books (
   total_page INTEGER NOT NULL DEFAULT 20,
   created_at timestamp DEFAULT statement_timestamp() NOT NULL,
   updated_at timestamp DEFAULT statement_timestamp() NOT NULL,
-  published_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  published_at  timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
   FOREIGN KEY (author_id) REFERENCES authors(id),
   FOREIGN KEY (publisher_id) REFERENCES publishers(id)
 );
