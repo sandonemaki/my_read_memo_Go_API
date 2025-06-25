@@ -29,6 +29,7 @@ type User struct {
 	DeletedAt sql.Null[time.Time] `db:"deleted_at" `
 	CreatedAt time.Time           `db:"created_at" `
 	UpdatedAt time.Time           `db:"updated_at" `
+	UID       string              `db:"uid" `
 
 	R userR `db:"-" `
 }
@@ -55,6 +56,7 @@ type userColumnNames struct {
 	DeletedAt string
 	CreatedAt string
 	UpdatedAt string
+	UID       string
 }
 
 var UserColumns = buildUserColumns("users")
@@ -66,6 +68,7 @@ type userColumns struct {
 	DeletedAt  psql.Expression
 	CreatedAt  psql.Expression
 	UpdatedAt  psql.Expression
+	UID        psql.Expression
 }
 
 func (c userColumns) Alias() string {
@@ -84,6 +87,7 @@ func buildUserColumns(alias string) userColumns {
 		DeletedAt:  psql.Quote(alias, "deleted_at"),
 		CreatedAt:  psql.Quote(alias, "created_at"),
 		UpdatedAt:  psql.Quote(alias, "updated_at"),
+		UID:        psql.Quote(alias, "uid"),
 	}
 }
 
@@ -93,6 +97,7 @@ type userWhere[Q psql.Filterable] struct {
 	DeletedAt psql.WhereNullMod[Q, time.Time]
 	CreatedAt psql.WhereMod[Q, time.Time]
 	UpdatedAt psql.WhereMod[Q, time.Time]
+	UID       psql.WhereMod[Q, string]
 }
 
 func (userWhere[Q]) AliasedAs(alias string) userWhere[Q] {
@@ -106,6 +111,7 @@ func buildUserWhere[Q psql.Filterable](cols userColumns) userWhere[Q] {
 		DeletedAt: psql.WhereNull[Q, time.Time](cols.DeletedAt),
 		CreatedAt: psql.Where[Q, time.Time](cols.CreatedAt),
 		UpdatedAt: psql.Where[Q, time.Time](cols.UpdatedAt),
+		UID:       psql.Where[Q, string](cols.UID),
 	}
 }
 
@@ -131,10 +137,11 @@ type UserSetter struct {
 	DeletedAt *sql.Null[time.Time] `db:"deleted_at" `
 	CreatedAt *time.Time           `db:"created_at" `
 	UpdatedAt *time.Time           `db:"updated_at" `
+	UID       *string              `db:"uid" `
 }
 
 func (s UserSetter) SetColumns() []string {
-	vals := make([]string, 0, 5)
+	vals := make([]string, 0, 6)
 	if s.Ulid != nil {
 		vals = append(vals, "ulid")
 	}
@@ -153,6 +160,10 @@ func (s UserSetter) SetColumns() []string {
 
 	if s.UpdatedAt != nil {
 		vals = append(vals, "updated_at")
+	}
+
+	if s.UID != nil {
+		vals = append(vals, "uid")
 	}
 
 	return vals
@@ -174,6 +185,9 @@ func (s UserSetter) Overwrite(t *User) {
 	if s.UpdatedAt != nil {
 		t.UpdatedAt = *s.UpdatedAt
 	}
+	if s.UID != nil {
+		t.UID = *s.UID
+	}
 }
 
 func (s *UserSetter) Apply(q *dialect.InsertQuery) {
@@ -182,7 +196,7 @@ func (s *UserSetter) Apply(q *dialect.InsertQuery) {
 	})
 
 	q.AppendValues(bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
-		vals := make([]bob.Expression, 5)
+		vals := make([]bob.Expression, 6)
 		if s.Ulid != nil {
 			vals[0] = psql.Arg(*s.Ulid)
 		} else {
@@ -213,6 +227,12 @@ func (s *UserSetter) Apply(q *dialect.InsertQuery) {
 			vals[4] = psql.Raw("DEFAULT")
 		}
 
+		if s.UID != nil {
+			vals[5] = psql.Arg(*s.UID)
+		} else {
+			vals[5] = psql.Raw("DEFAULT")
+		}
+
 		return bob.ExpressSlice(ctx, w, d, start, vals, "", ", ", "")
 	}))
 }
@@ -222,7 +242,7 @@ func (s UserSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s UserSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 5)
+	exprs := make([]bob.Expression, 0, 6)
 
 	if s.Ulid != nil {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
@@ -256,6 +276,13 @@ func (s UserSetter) Expressions(prefix ...string) []bob.Expression {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			psql.Quote(append(prefix, "updated_at")...),
 			psql.Arg(s.UpdatedAt),
+		}})
+	}
+
+	if s.UID != nil {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "uid")...),
+			psql.Arg(s.UID),
 		}})
 	}
 

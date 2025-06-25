@@ -40,6 +40,7 @@ type UserTemplate struct {
 	DeletedAt func() sql.Null[time.Time]
 	CreatedAt func() time.Time
 	UpdatedAt func() time.Time
+	UID       func() string
 
 	r userR
 	f *Factory
@@ -121,6 +122,10 @@ func (o UserTemplate) BuildSetter() *models.UserSetter {
 		val := o.UpdatedAt()
 		m.UpdatedAt = &val
 	}
+	if o.UID != nil {
+		val := o.UID()
+		m.UID = &val
+	}
 
 	return m
 }
@@ -157,6 +162,9 @@ func (o UserTemplate) Build() *models.User {
 	}
 	if o.UpdatedAt != nil {
 		m.UpdatedAt = o.UpdatedAt()
+	}
+	if o.UID != nil {
+		m.UID = o.UID()
 	}
 
 	o.setModelRels(m)
@@ -336,6 +344,7 @@ func (m userMods) RandomizeAllColumns(f *faker.Faker) UserMod {
 		UserMods.RandomDeletedAt(f),
 		UserMods.RandomCreatedAt(f),
 		UserMods.RandomUpdatedAt(f),
+		UserMods.RandomUID(f),
 	}
 }
 
@@ -512,6 +521,37 @@ func (m userMods) RandomUpdatedAt(f *faker.Faker) UserMod {
 	return UserModFunc(func(_ context.Context, o *UserTemplate) {
 		o.UpdatedAt = func() time.Time {
 			return random_time_Time(f)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m userMods) UID(val string) UserMod {
+	return UserModFunc(func(_ context.Context, o *UserTemplate) {
+		o.UID = func() string { return val }
+	})
+}
+
+// Set the Column from the function
+func (m userMods) UIDFunc(f func() string) UserMod {
+	return UserModFunc(func(_ context.Context, o *UserTemplate) {
+		o.UID = f
+	})
+}
+
+// Clear any values for the column
+func (m userMods) UnsetUID() UserMod {
+	return UserModFunc(func(_ context.Context, o *UserTemplate) {
+		o.UID = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m userMods) RandomUID(f *faker.Faker) UserMod {
+	return UserModFunc(func(_ context.Context, o *UserTemplate) {
+		o.UID = func() string {
+			return random_string(f, "255")
 		}
 	})
 }
