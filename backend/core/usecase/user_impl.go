@@ -13,6 +13,7 @@ type User struct {
 	userRepo repository.User
 }
 
+// NewUser creates a new User usecase instance
 func NewUser(userRepo repository.User) *User {
 	return &User{
 		userRepo: userRepo,
@@ -24,6 +25,10 @@ func (u *User) Create(ctx context.Context, p input.CreateUser) (result *output.U
 	user := &model.User{
 		UID:      p.UID,
 		Nickname: p.Nickname,
+	}
+
+	if err := u.userRepo.Create(ctx, user); err != nil {
+		return nil, err
 	}
 
 	return &output.User{
