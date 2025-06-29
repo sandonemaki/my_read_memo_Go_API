@@ -18,11 +18,7 @@ func NewClient(db *sql.DB) Client {
 	return Client{db}
 }
 
-// SQLHandler :
-// type SQLHandler interface {
-// 	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
-// 	QueryContext(ctx context.Context, query string, args ...any) (scan.Rows, error)
-// }
+// SQLHandlerはbobの場合必要ない
 
 // ExecContextメソッドは、SQLデータベースに対して更新系のクエリを実行するためのメソッド
 // 主に書き込み系の操作で使用

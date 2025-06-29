@@ -34,3 +34,4 @@ bin/core
 yondecoServiceAccount.json
 .envrc
 .DS_Store
+CLAUDE.md
