@@ -3,9 +3,16 @@ module github.com/sandonemaki/my_read_memo_Go_API/backend
 go 1.24.4
 
 require (
+	github.com/DATA-DOG/go-txdb v0.2.1
+	github.com/google/go-cmp v0.7.0
 	github.com/jaswdr/faker/v2 v2.5.0
 	github.com/lib/pq v1.10.9
+	github.com/pkg/errors v0.9.1
+	github.com/spf13/viper v1.20.1
 	github.com/stephenafamo/bob v0.38.0
+	github.com/stephenafamo/scan v0.7.0
+	github.com/vertica/vertica-sql-go v1.3.3
+	go.uber.org/mock v0.5.2
 )
 
 require (
@@ -20,8 +27,6 @@ require (
 	github.com/spf13/afero v1.12.0 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
-	github.com/spf13/viper v1.20.1 // indirect
-	github.com/stephenafamo/scan v0.7.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
