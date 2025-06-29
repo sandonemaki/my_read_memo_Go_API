@@ -12,4 +12,5 @@ mockgen:
 bobinstall:
 	go install github.com/stephenafamo/bob/gen/bobgen-psql@v0.38.0
 
-bobgen: bobgen-psql -c bobgen.yaml
+bobgen:
+	bobgen-psql -c ../../bobgen.yaml
