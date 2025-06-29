@@ -8,12 +8,13 @@ import (
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/db"
 )
 
+// テスト用のデータベース接続文字列
+const testDSN = "postgres://yondeco:yondeco@localhost:5432/yondeco?sslmode=disable"
+
 func TestDatabaseConnection(t *testing.T) {
 	// データベース接続テスト
 	t.Run("データベース接続テスト", func(t *testing.T) {
-		// データベース接続
-		dsn := "postgres://yondeco:yondeco@localhost:5432/yondeco?sslmode=disable"
-		sqlDB, err := sql.Open("postgres", dsn)
+		sqlDB, err := sql.Open("postgres", testDSN)
 		if err != nil {
 			t.Fatalf("データベース接続エラー: %v", err)
 		}
@@ -27,9 +28,7 @@ func TestDatabaseConnection(t *testing.T) {
 	})
 
 	t.Run("db.Client作成テスト", func(t *testing.T) {
-		// データベース接続
-		dsn := "postgres://yondeco:yondeco@localhost:5432/yondeco?sslmode=disable"
-		sqlDB, err := sql.Open("postgres", dsn)
+		sqlDB, err := sql.Open("postgres", testDSN)
 		if err != nil {
 			t.Fatalf("データベース接続エラー: %v", err)
 		}
@@ -37,7 +36,9 @@ func TestDatabaseConnection(t *testing.T) {
 
 		// db.Clientを作成
 		dbClient := db.NewClient(sqlDB)
-		if dbClient.ExecContext == nil {
+
+		// dbClientが正しく初期化されているか確認
+		if dbClient == (db.Client{}) { // 空のClientと比較
 			t.Fatal("db.Clientの作成に失敗しました")
 		}
 		t.Log("✅ db.Client作成成功")

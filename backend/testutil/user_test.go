@@ -13,18 +13,19 @@ import (
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/db"
 )
 
-// テスト用のデータベース接続を提供するヘルパー関数
+// setupTestDB はテスト用のデータベース接続を提供します
 func setupTestDB(t *testing.T) *sql.DB {
-	dsn := "postgres://yondeco:yondeco@localhost:5432/yondeco?sslmode=disable"
-	sqlDB, err := sql.Open("postgres", dsn)
+	sqlDB, err := sql.Open("postgres", testDSN)
 	if err != nil {
 		t.Fatalf("データベース接続エラー: %v", err)
+	}
+	if err := sqlDB.Ping(); err != nil {
+		t.Fatalf("データベースPingエラー: %v", err)
 	}
 	return sqlDB
 }
 
 func TestUserCreation(t *testing.T) {
-	// データベース接続をセットアップ
 	sqlDB := setupTestDB(t)
 	defer sqlDB.Close()
 
@@ -34,7 +35,6 @@ func TestUserCreation(t *testing.T) {
 
 		// リポジトリを作成
 		userRepo := repository.NewUser(&dbClient)
-		t.Log("✅ リポジトリ作成成功！")
 
 		// テストユーザーを作成
 		ctx := context.Background()
@@ -43,7 +43,7 @@ func TestUserCreation(t *testing.T) {
 			Ulid:      fmt.Sprintf("test_%d", timestamp),
 			UID:       fmt.Sprintf("uid_%d", timestamp),
 			Nickname:  fmt.Sprintf("テストユーザー_%d", timestamp),
-			DeletedAt: sql.Null[time.Time]{}, // NULL値
+			DeletedAt: sql.Null[time.Time]{},
 		}
 
 		t.Logf("作成予定のユーザー: ULID=%s, UID=%s, Nickname=%s",
