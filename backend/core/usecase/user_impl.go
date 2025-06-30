@@ -7,6 +7,7 @@ import (
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/repository"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase/input"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase/output"
+	"github.com/volatiletech/null"
 )
 
 type User struct {
@@ -28,6 +29,24 @@ func (u *User) Create(ctx context.Context, p input.CreateUser) (result *output.U
 	}
 
 	if err := u.userRepo.Create(ctx, user); err != nil {
+		return nil, err
+	}
+
+	return &output.User{
+		ULID:      user.Ulid,
+		UID:       user.UID,
+		Nickname:  user.Nickname,
+		DeletedAt: user.DeletedAt,
+		UpdatedAt: user.UpdatedAt,
+		CreatedAt: user.CreatedAt,
+	}, nil
+}
+
+func (u *User) GetMe(ctx context.Context, input input.CurrentUser) (result *output.User, err error) {
+	user, err := u.userRepo.Get(ctx, repository.UserGetQuery{
+		ULID: null.StringFrom(input.UID),
+	})
+	if err != nil {
 		return nil, err
 	}
 
