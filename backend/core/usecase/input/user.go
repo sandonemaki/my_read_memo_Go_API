@@ -32,3 +32,13 @@ type UpdateUser struct {
 	ULID     string `validate:"required"`
 	Nickname string `validate:"required"`
 }
+
+func NewDeleteUser(ULID string) DeleteUser {
+	return DeleteUser{
+		ULID: ULID,
+	}
+}
+
+type DeleteUser struct {
+	ULID string `validate:"required"`
+}
