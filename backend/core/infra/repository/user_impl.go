@@ -63,5 +63,21 @@ func (r *user) Create(ctx context.Context, user *model.User) (err error) {
 }
 
 func (r *user) Update(ctx context.Context, user *model.User) (ulid string, err error) {
-	return ulid, nil
+	// 将来：複数条件が必要になった場合
+	// modsをスライスに変更して条件を追加
+	// var mods []bob.Mod[*dialect.UpdateQuery]
+	// mods = append(mods, dbmodels.UpdateWhere.Users.Ulid.EQ(user.Ulid))
+	// mods = append(mods, dbmodels.UpdateWhere.Users.DeletedAt.IsNull())
+	setter := &dbmodels.UserSetter{
+		Nickname: &user.Nickname,
+	}
+
+	mods := dbmodels.UpdateWhere.Users.Ulid.EQ(user.Ulid)
+	_, err = dbmodels.Users.Update(setter.UpdateMod(), mods).Exec(ctx, r.dbClient)
+	// _, err = dbmodels.Users.Update(setter.UpdateMod(), dbmodels.UpdateWhere.Users.Ulid.EQ(user.Ulid)).Exec(ctx, r.dbClient)
+	if err != nil {
+		return "", err
+	}
+
+	return user.Ulid, nil
 }
