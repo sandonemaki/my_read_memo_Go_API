@@ -60,7 +60,7 @@ func (u *User) GetMe(ctx context.Context, input input.CurrentUser) (result *outp
 	}, nil
 }
 
-func (u *User) Update(ctx context.Context, input input.UpdateUser) (result *output.User, err error) {
+func (u *User) UpdateNickname(ctx context.Context, input input.UpdateUser) (result *output.User, err error) {
 	// ulidを取得する
 	user, err := u.userRepo.Get(ctx, repository.UserGetQuery{
 		ULID: null.StringFrom(input.ULID),
