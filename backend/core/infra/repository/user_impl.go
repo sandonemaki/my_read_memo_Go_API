@@ -61,3 +61,7 @@ func (r *user) Create(ctx context.Context, user *model.User) (err error) {
 	}
 	return nil
 }
+
+func (r *user) Update(ctx context.Context, user *model.User) (ulid string, err error) {
+	return ulid, nil
+}

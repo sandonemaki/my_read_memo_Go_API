@@ -10,6 +10,7 @@ import (
 type User interface {
 	Get(ctx context.Context, query UserGetQuery) (*model.User, error)
 	Create(ctx context.Context, user *model.User) (err error)
+	Update(ctx context.Context, user *model.User) (ulid string, err error)
 }
 
 type UserGetQuery struct {

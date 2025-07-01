@@ -59,3 +59,40 @@ func (u *User) GetMe(ctx context.Context, input input.CurrentUser) (result *outp
 		CreatedAt: user.CreatedAt,
 	}, nil
 }
+
+func (u *User) Update(ctx context.Context, input input.UpdateUser) (result *output.User, err error) {
+	// ulidを取得する
+	user, err := u.userRepo.Get(ctx, repository.UserGetQuery{
+		ULID: null.StringFrom(input.ULID),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// ユーザー情報を更新
+	user.Nickname = input.Nickname
+
+	// データベースを更新
+	var userUlid string
+	userUlid, err = u.userRepo.Update(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	// 更新後のユーザー情報を取得
+	updatedUser, err := u.userRepo.Get(ctx, repository.UserGetQuery{
+		ULID: null.StringFrom(userUlid),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &output.User{
+		ULID:      updatedUser.Ulid,
+		UID:       updatedUser.UID,
+		Nickname:  updatedUser.Nickname,
+		DeletedAt: updatedUser.DeletedAt,
+		UpdatedAt: updatedUser.UpdatedAt,
+		CreatedAt: updatedUser.CreatedAt,
+	}, nil
+}
