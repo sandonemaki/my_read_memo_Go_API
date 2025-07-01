@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"time"
 
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/model"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/repository"
@@ -80,4 +82,16 @@ func (r *user) Update(ctx context.Context, user *model.User) (ulid string, err e
 	}
 
 	return user.Ulid, nil
+}
+
+// Deleteメソッドの実装
+func (r *user) Delete(ctx context.Context, ulid string) (err error) {
+	mods := dbmodels.UpdateWhere.Users.Ulid.EQ(ulid)
+	now := sql.Null[time.Time]{V: time.Now(), Valid: true}
+	_, err = dbmodels.Users.Update(dbmodels.UserSetter{DeletedAt: &now}.UpdateMod(), mods).Exec(ctx, r.dbClient)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

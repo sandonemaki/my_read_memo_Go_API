@@ -96,3 +96,8 @@ func (u *User) Update(ctx context.Context, input input.UpdateUser) (result *outp
 		CreatedAt: updatedUser.CreatedAt,
 	}, nil
 }
+
+func (u *User) Delete(ctx context.Context, input input.DeleteUser) (err error) {
+	// ulidを取得する
+	return u.userRepo.Delete(ctx, input.ULID)
+}
