@@ -26,7 +26,7 @@ func NewUser(
 	}
 }
 
-func (u *User) Create(ctx context.Context, p input.CreateUser) (result *output.User, err error) {
+func (u *User) Create(ctx context.Context, p input.CreateUser) (result *output.CreateUser, err error) {
 	// get user by ulid
 	user := &model.User{
 		UID:      p.UID,
@@ -37,13 +37,8 @@ func (u *User) Create(ctx context.Context, p input.CreateUser) (result *output.U
 		return nil, err
 	}
 
-	return &output.User{
-		ULID:      user.Ulid,
-		UID:       user.UID,
-		Nickname:  user.Nickname,
-		DeletedAt: user.DeletedAt,
-		UpdatedAt: user.UpdatedAt,
-		CreatedAt: user.CreatedAt,
+	return &output.CreateUser{
+		User: user,
 	}, nil
 }
 
@@ -65,7 +60,7 @@ func (u *User) GetMe(ctx context.Context, input input.CurrentUser) (result *outp
 	}, nil
 }
 
-func (u *User) UpdateNickname(ctx context.Context, input input.UpdateUser) (result *output.GetUser, err error) {
+func (u *User) UpdateNickname(ctx context.Context, input input.UpdateUser) (result *output.UpdateUser, err error) {
 	// ulidを取得する
 	user, err := u.userQuery.Get(ctx, query.UserGetQuery{
 		ULID: null.StringFrom(input.ULID),
@@ -92,7 +87,7 @@ func (u *User) UpdateNickname(ctx context.Context, input input.UpdateUser) (resu
 		return nil, err
 	}
 
-	return &output.GetUser{
+	return &output.UpdateUser{
 		User: updatedUser,
 	}, nil
 }
