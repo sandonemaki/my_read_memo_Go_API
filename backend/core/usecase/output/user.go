@@ -1,15 +1,9 @@
 package output
 
 import (
-	"database/sql"
-	"time"
+	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/model"
 )
 
-type User struct {
-	ULID      string
-	UID       string
-	Nickname  string
-	DeletedAt sql.Null[time.Time]
-	UpdatedAt time.Time
-	CreatedAt time.Time
+type GetUser struct {
+	User *model.User
 }

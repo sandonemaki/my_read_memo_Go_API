@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/model"
+	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/query"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/repository"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase/input"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase/output"
@@ -11,13 +12,17 @@ import (
 )
 
 type User struct {
-	userRepo repository.User
+	userQuery query.User
+	userRepo  repository.User
 }
 
 // NewUser creates a new User usecase instance
-func NewUser(userRepo repository.User) *User {
+func NewUser(
+	userQuery query.User,
+	userRepo repository.User) *User {
 	return &User{
-		userRepo: userRepo,
+		userQuery: userQuery,
+		userRepo:  userRepo,
 	}
 }
 
@@ -42,27 +47,27 @@ func (u *User) Create(ctx context.Context, p input.CreateUser) (result *output.U
 	}, nil
 }
 
-func (u *User) GetMe(ctx context.Context, input input.CurrentUser) (result *output.User, err error) {
-	user, err := u.userRepo.Get(ctx, repository.UserGetQuery{
+func (u *User) GetMe(ctx context.Context, input input.CurrentUser) (result *output.GetUser, err error) {
+	var user *model.User
+	// if err := u.Validate(); err != nil {
+	// 	return nil, err
+	// }
+
+	user, err = u.userQuery.Get(ctx, query.UserGetQuery{
 		ULID: null.StringFrom(input.UID),
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return &output.User{
-		ULID:      user.Ulid,
-		UID:       user.UID,
-		Nickname:  user.Nickname,
-		DeletedAt: user.DeletedAt,
-		UpdatedAt: user.UpdatedAt,
-		CreatedAt: user.CreatedAt,
+	return &output.GetUser{
+		User: user,
 	}, nil
 }
 
-func (u *User) UpdateNickname(ctx context.Context, input input.UpdateUser) (result *output.User, err error) {
+func (u *User) UpdateNickname(ctx context.Context, input input.UpdateUser) (result *output.GetUser, err error) {
 	// ulidを取得する
-	user, err := u.userRepo.Get(ctx, repository.UserGetQuery{
+	user, err := u.userQuery.Get(ctx, query.UserGetQuery{
 		ULID: null.StringFrom(input.ULID),
 	})
 	if err != nil {
@@ -80,20 +85,15 @@ func (u *User) UpdateNickname(ctx context.Context, input input.UpdateUser) (resu
 	}
 
 	// 更新後のユーザー情報を取得
-	updatedUser, err := u.userRepo.Get(ctx, repository.UserGetQuery{
+	updatedUser, err := u.userQuery.Get(ctx, query.UserGetQuery{
 		ULID: null.StringFrom(userUlid),
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return &output.User{
-		ULID:      updatedUser.Ulid,
-		UID:       updatedUser.UID,
-		Nickname:  updatedUser.Nickname,
-		DeletedAt: updatedUser.DeletedAt,
-		UpdatedAt: updatedUser.UpdatedAt,
-		CreatedAt: updatedUser.CreatedAt,
+	return &output.GetUser{
+		User: updatedUser,
 	}, nil
 }
 
