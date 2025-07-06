@@ -52,6 +52,13 @@ type UpdateUser struct {
 	Nickname string `validate:"required"`
 }
 
+func (u *UpdateUser) Validate() error {
+	if err := validate.Struct(u); err != nil {
+		return errors.Wrap(errof.ErrInvalidRequest, err.Error())
+	}
+	return nil
+}
+
 func NewDeleteUser(ULID string) DeleteUser {
 	return DeleteUser{
 		ULID: ULID,
@@ -60,4 +67,11 @@ func NewDeleteUser(ULID string) DeleteUser {
 
 type DeleteUser struct {
 	ULID string `validate:"required"`
+}
+
+func (u *DeleteUser) Validate() error {
+	if err := validate.Struct(u); err != nil {
+		return errors.Wrap(errof.ErrInvalidRequest, err.Error())
+	}
+	return nil
 }
