@@ -7,6 +7,7 @@ import (
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/query"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/repository"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase/input"
+
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase/output"
 	"github.com/volatiletech/null"
 )
@@ -42,11 +43,11 @@ func (u *User) Create(ctx context.Context, p input.CreateUser) (result *output.C
 	}, nil
 }
 
-func (u *User) GetMe(ctx context.Context, input input.CurrentUser) (result *output.GetUser, err error) {
+func (u *User) GetMe(ctx context.Context, input input.GetCurrentUserDetail) (result *output.GetUser, err error) {
 	var user *model.User
-	// if err := u.Validate(); err != nil {
-	// 	return nil, err
-	// }
+	if err := input.Validate(); err != nil {
+		return nil, err
+	}
 
 	user, err = u.userQuery.GetByULID(ctx, query.UserGetQuery{
 		ULID: null.StringFrom(input.UID),

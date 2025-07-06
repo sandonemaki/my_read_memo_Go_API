@@ -1,5 +1,10 @@
 package input
 
+import (
+	"github.com/pkg/errors"
+	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/errof"
+)
+
 func NewCreateUser(UID string, name string) CreateUser {
 	return CreateUser{
 		UID:      UID,
@@ -12,14 +17,28 @@ type CreateUser struct {
 	Nickname string `validate:"required"`
 }
 
-func NewCurrentUser(UID string) CurrentUser {
-	return CurrentUser{
+func (u *CreateUser) Validate() error {
+	if err := validate.Struct(u); err != nil {
+		return errors.Wrap(errof.ErrInvalidRequest, err.Error())
+	}
+	return nil
+}
+
+func NewGetCurrentUserDetail(UID string) GetCurrentUserDetail {
+	return GetCurrentUserDetail{
 		UID: UID,
 	}
 }
 
-type CurrentUser struct {
+type GetCurrentUserDetail struct {
 	UID string `validate:"required"`
+}
+
+func (u *GetCurrentUserDetail) Validate() error {
+	if err := validate.Struct(u); err != nil {
+		return errors.Wrap(errof.ErrInvalidRequest, err.Error())
+	}
+	return nil
 }
 
 func NewUpdateUser(UID string, name string) UpdateUser {
@@ -33,6 +52,13 @@ type UpdateUser struct {
 	Nickname string `validate:"required"`
 }
 
+func (u *UpdateUser) Validate() error {
+	if err := validate.Struct(u); err != nil {
+		return errors.Wrap(errof.ErrInvalidRequest, err.Error())
+	}
+	return nil
+}
+
 func NewDeleteUser(ULID string) DeleteUser {
 	return DeleteUser{
 		ULID: ULID,
@@ -41,4 +67,11 @@ func NewDeleteUser(ULID string) DeleteUser {
 
 type DeleteUser struct {
 	ULID string `validate:"required"`
+}
+
+func (u *DeleteUser) Validate() error {
+	if err := validate.Struct(u); err != nil {
+		return errors.Wrap(errof.ErrInvalidRequest, err.Error())
+	}
+	return nil
 }
