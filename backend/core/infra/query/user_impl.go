@@ -19,7 +19,7 @@ func NewUser(dbClient *db.Client) query.User {
 	return &user{dbClient}
 }
 
-func (r *user) Get(ctx context.Context, query query.UserGetQuery) (user *model.User, err error) {
+func (r *user) GetByULID(ctx context.Context, query query.UserGetQuery) (user *model.User, err error) {
 
 	mods := []bob.Mod[*dialect.SelectQuery]{}
 

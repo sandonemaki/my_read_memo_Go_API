@@ -48,7 +48,7 @@ func (u *User) GetMe(ctx context.Context, input input.CurrentUser) (result *outp
 	// 	return nil, err
 	// }
 
-	user, err = u.userQuery.Get(ctx, query.UserGetQuery{
+	user, err = u.userQuery.GetByULID(ctx, query.UserGetQuery{
 		ULID: null.StringFrom(input.UID),
 	})
 	if err != nil {
@@ -62,7 +62,7 @@ func (u *User) GetMe(ctx context.Context, input input.CurrentUser) (result *outp
 
 func (u *User) UpdateNickname(ctx context.Context, input input.UpdateUser) (result *output.UpdateUser, err error) {
 	// ulidを取得する
-	user, err := u.userQuery.Get(ctx, query.UserGetQuery{
+	user, err := u.userQuery.GetByULID(ctx, query.UserGetQuery{
 		ULID: null.StringFrom(input.ULID),
 	})
 	if err != nil {
@@ -80,7 +80,7 @@ func (u *User) UpdateNickname(ctx context.Context, input input.UpdateUser) (resu
 	}
 
 	// 更新後のユーザー情報を取得
-	updatedUser, err := u.userQuery.Get(ctx, query.UserGetQuery{
+	updatedUser, err := u.userQuery.GetByULID(ctx, query.UserGetQuery{
 		ULID: null.StringFrom(userUlid),
 	})
 	if err != nil {

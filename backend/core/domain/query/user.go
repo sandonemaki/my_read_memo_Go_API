@@ -8,7 +8,7 @@ import (
 )
 
 type User interface {
-	Get(ctx context.Context, query UserGetQuery) (*model.User, error)
+	GetByULID(ctx context.Context, query UserGetQuery) (*model.User, error)
 }
 
 type UserGetQuery struct {
