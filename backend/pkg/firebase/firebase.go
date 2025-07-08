@@ -2,6 +2,7 @@ package firebase
 
 import (
 	"context"
+	"fmt"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
@@ -26,7 +27,7 @@ type Credential struct {
 
 // FirebaseGlue
 type Glue interface {
-	GetCredFromJWT(idToken string) (cred *Credential, err error)
+	GetCredFromJWT(ctx context.Context, idToken string) (cred *Credential, err error)
 	DeleteUser(ctx context.Context, uid string) error
 }
 
@@ -38,26 +39,26 @@ type firebaseGlue struct {
 // NewFirebaseGlue :
 // https://firebase.google.com/docs/auth/admin/verify-id-tokens?hl=ja#verify_id_tokens_using_the_firebase_admin_sdk
 // 戻り値は interface メソッドの実装
-func NewFirebaseGlue() Glue {
+func NewFirebaseGlue() (Glue, error) {
 	// Firebase Admin Appを初期化
 	app, err := firebase.NewApp(context.Background(), nil)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to initialize Firebase app: %w", err)
 	}
 	// Firebase Admin AppからAuthサービスを取得
 	firebaseAuth, err := app.Auth(context.Background())
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to get Firebase auth client: %w", err)
 	}
-	return firebaseGlue{firebaseAuth}
+	return &firebaseGlue{firebaseAuth}, nil
 }
 
 // tokenの検証
 // 検証後にFirebaseのJWTトークンから必要な情報を抽出し、アプリケーション用のCredential構造体に変換
 // NOTE: https://firebase.google.com/docs/auth/admin/verify-id-tokens?hl=ja#verify_id_tokens_using_the_firebase_admin_sdk
-func (f firebaseGlue) GetCredFromJWT(idToken string) (cred *Credential, err error) {
+func (f firebaseGlue) GetCredFromJWT(ctx context.Context, idToken string) (cred *Credential, err error) {
 
-	token, err := f.client.VerifyIDToken(context.Background(), idToken)
+	token, err := f.client.VerifyIDToken(ctx, idToken)
 	if err != nil {
 		return nil, err
 	}
@@ -66,15 +67,27 @@ func (f firebaseGlue) GetCredFromJWT(idToken string) (cred *Credential, err erro
 	var email string
 	if v, ok := token.Claims["email"]; ok {
 		// NOTE: v.(string) は型アサーション
-		email = v.(string)
+		if emailStr, ok := v.(string); ok {
+			email = emailStr
+		}
+	}
+	var emailVerified bool
+	if v, ok := token.Claims["email_verified"]; ok {
+		if verified, ok := v.(bool); ok {
+			emailVerified = verified
+		}
 	}
 
 	var picture, name null.String
 	if v, ok := token.Claims["picture"]; ok {
-		picture = null.StringFrom(v.(string))
+		if pictureStr, ok := v.(string); ok {
+			picture = null.StringFrom(pictureStr)
+		}
 	}
 	if v, ok := token.Claims["name"]; ok {
-		name = null.StringFrom(v.(string))
+		if nameStr, ok := v.(string); ok {
+			name = null.StringFrom(nameStr)
+		}
 	}
 
 	if len(name.String) == 0 {
@@ -84,8 +97,9 @@ func (f firebaseGlue) GetCredFromJWT(idToken string) (cred *Credential, err erro
 	cred = &Credential{
 		UID:           token.UID,
 		Email:         email,
-		EmailVerified: true,
+		EmailVerified: emailVerified,
 		PictureURL:    picture,
+		Disabled:      false,
 		DisplayName:   name,
 	}
 	return cred, nil
