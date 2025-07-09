@@ -7,14 +7,14 @@ import (
 
 func NewCreateUser(UID string, name string) CreateUser {
 	return CreateUser{
-		UID:      UID,
-		Nickname: name,
+		UID:         UID,
+		DisplayName: name,
 	}
 }
 
 type CreateUser struct {
-	UID      string `validate:"required"`
-	Nickname string `validate:"required"`
+	UID         string `validate:"required"`
+	DisplayName string `validate:"required"`
 }
 
 func (u *CreateUser) Validate() error {
@@ -43,13 +43,13 @@ func (u *GetCurrentUserDetail) Validate() error {
 
 func NewUpdateUser(UID string, name string) UpdateUser {
 	return UpdateUser{
-		Nickname: name,
+		DisplayName: name,
 	}
 }
 
 type UpdateUser struct {
-	ULID     string `validate:"required"`
-	Nickname string `validate:"required"`
+	ULID        string `validate:"required"`
+	DisplayName string `validate:"required"`
 }
 
 func (u *UpdateUser) Validate() error {

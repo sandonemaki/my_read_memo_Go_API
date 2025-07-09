@@ -7,9 +7,9 @@ import (
 
 func ToUserEntity(user *model.User) *dbmodels.User {
 	return &dbmodels.User{
-		Ulid:      user.Ulid,
-		UID:       user.UID,
-		Nickname:  user.Nickname,
-		DeletedAt: user.DeletedAt,
+		Ulid:        user.Ulid,
+		UID:         user.UID,
+		DisplayName: user.DisplayName,
+		DeletedAt:   user.DeletedAt,
 	}
 }
