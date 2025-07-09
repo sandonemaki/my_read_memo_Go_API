@@ -24,12 +24,12 @@ import (
 
 // User is an object representing the database table.
 type User struct {
-	Ulid      string              `db:"ulid,pk" `
-	Nickname  string              `db:"nickname" `
-	DeletedAt sql.Null[time.Time] `db:"deleted_at" `
-	CreatedAt time.Time           `db:"created_at" `
-	UpdatedAt time.Time           `db:"updated_at" `
-	UID       string              `db:"uid" `
+	Ulid        string              `db:"ulid,pk" `
+	DisplayName string              `db:"display_name" `
+	DeletedAt   sql.Null[time.Time] `db:"deleted_at" `
+	CreatedAt   time.Time           `db:"created_at" `
+	UpdatedAt   time.Time           `db:"updated_at" `
+	UID         string              `db:"uid" `
 
 	R userR `db:"-" `
 }
@@ -51,24 +51,24 @@ type userR struct {
 }
 
 type userColumnNames struct {
-	Ulid      string
-	Nickname  string
-	DeletedAt string
-	CreatedAt string
-	UpdatedAt string
-	UID       string
+	Ulid        string
+	DisplayName string
+	DeletedAt   string
+	CreatedAt   string
+	UpdatedAt   string
+	UID         string
 }
 
 var UserColumns = buildUserColumns("users")
 
 type userColumns struct {
-	tableAlias string
-	Ulid       psql.Expression
-	Nickname   psql.Expression
-	DeletedAt  psql.Expression
-	CreatedAt  psql.Expression
-	UpdatedAt  psql.Expression
-	UID        psql.Expression
+	tableAlias  string
+	Ulid        psql.Expression
+	DisplayName psql.Expression
+	DeletedAt   psql.Expression
+	CreatedAt   psql.Expression
+	UpdatedAt   psql.Expression
+	UID         psql.Expression
 }
 
 func (c userColumns) Alias() string {
@@ -81,23 +81,23 @@ func (userColumns) AliasedAs(alias string) userColumns {
 
 func buildUserColumns(alias string) userColumns {
 	return userColumns{
-		tableAlias: alias,
-		Ulid:       psql.Quote(alias, "ulid"),
-		Nickname:   psql.Quote(alias, "nickname"),
-		DeletedAt:  psql.Quote(alias, "deleted_at"),
-		CreatedAt:  psql.Quote(alias, "created_at"),
-		UpdatedAt:  psql.Quote(alias, "updated_at"),
-		UID:        psql.Quote(alias, "uid"),
+		tableAlias:  alias,
+		Ulid:        psql.Quote(alias, "ulid"),
+		DisplayName: psql.Quote(alias, "display_name"),
+		DeletedAt:   psql.Quote(alias, "deleted_at"),
+		CreatedAt:   psql.Quote(alias, "created_at"),
+		UpdatedAt:   psql.Quote(alias, "updated_at"),
+		UID:         psql.Quote(alias, "uid"),
 	}
 }
 
 type userWhere[Q psql.Filterable] struct {
-	Ulid      psql.WhereMod[Q, string]
-	Nickname  psql.WhereMod[Q, string]
-	DeletedAt psql.WhereNullMod[Q, time.Time]
-	CreatedAt psql.WhereMod[Q, time.Time]
-	UpdatedAt psql.WhereMod[Q, time.Time]
-	UID       psql.WhereMod[Q, string]
+	Ulid        psql.WhereMod[Q, string]
+	DisplayName psql.WhereMod[Q, string]
+	DeletedAt   psql.WhereNullMod[Q, time.Time]
+	CreatedAt   psql.WhereMod[Q, time.Time]
+	UpdatedAt   psql.WhereMod[Q, time.Time]
+	UID         psql.WhereMod[Q, string]
 }
 
 func (userWhere[Q]) AliasedAs(alias string) userWhere[Q] {
@@ -106,12 +106,12 @@ func (userWhere[Q]) AliasedAs(alias string) userWhere[Q] {
 
 func buildUserWhere[Q psql.Filterable](cols userColumns) userWhere[Q] {
 	return userWhere[Q]{
-		Ulid:      psql.Where[Q, string](cols.Ulid),
-		Nickname:  psql.Where[Q, string](cols.Nickname),
-		DeletedAt: psql.WhereNull[Q, time.Time](cols.DeletedAt),
-		CreatedAt: psql.Where[Q, time.Time](cols.CreatedAt),
-		UpdatedAt: psql.Where[Q, time.Time](cols.UpdatedAt),
-		UID:       psql.Where[Q, string](cols.UID),
+		Ulid:        psql.Where[Q, string](cols.Ulid),
+		DisplayName: psql.Where[Q, string](cols.DisplayName),
+		DeletedAt:   psql.WhereNull[Q, time.Time](cols.DeletedAt),
+		CreatedAt:   psql.Where[Q, time.Time](cols.CreatedAt),
+		UpdatedAt:   psql.Where[Q, time.Time](cols.UpdatedAt),
+		UID:         psql.Where[Q, string](cols.UID),
 	}
 }
 
@@ -132,12 +132,12 @@ type userErrors struct {
 // All values are optional, and do not have to be set
 // Generated columns are not included
 type UserSetter struct {
-	Ulid      *string              `db:"ulid,pk" `
-	Nickname  *string              `db:"nickname" `
-	DeletedAt *sql.Null[time.Time] `db:"deleted_at" `
-	CreatedAt *time.Time           `db:"created_at" `
-	UpdatedAt *time.Time           `db:"updated_at" `
-	UID       *string              `db:"uid" `
+	Ulid        *string              `db:"ulid,pk" `
+	DisplayName *string              `db:"display_name" `
+	DeletedAt   *sql.Null[time.Time] `db:"deleted_at" `
+	CreatedAt   *time.Time           `db:"created_at" `
+	UpdatedAt   *time.Time           `db:"updated_at" `
+	UID         *string              `db:"uid" `
 }
 
 func (s UserSetter) SetColumns() []string {
@@ -146,8 +146,8 @@ func (s UserSetter) SetColumns() []string {
 		vals = append(vals, "ulid")
 	}
 
-	if s.Nickname != nil {
-		vals = append(vals, "nickname")
+	if s.DisplayName != nil {
+		vals = append(vals, "display_name")
 	}
 
 	if s.DeletedAt != nil {
@@ -173,8 +173,8 @@ func (s UserSetter) Overwrite(t *User) {
 	if s.Ulid != nil {
 		t.Ulid = *s.Ulid
 	}
-	if s.Nickname != nil {
-		t.Nickname = *s.Nickname
+	if s.DisplayName != nil {
+		t.DisplayName = *s.DisplayName
 	}
 	if s.DeletedAt != nil {
 		t.DeletedAt = *s.DeletedAt
@@ -203,8 +203,8 @@ func (s *UserSetter) Apply(q *dialect.InsertQuery) {
 			vals[0] = psql.Raw("DEFAULT")
 		}
 
-		if s.Nickname != nil {
-			vals[1] = psql.Arg(*s.Nickname)
+		if s.DisplayName != nil {
+			vals[1] = psql.Arg(*s.DisplayName)
 		} else {
 			vals[1] = psql.Raw("DEFAULT")
 		}
@@ -251,10 +251,10 @@ func (s UserSetter) Expressions(prefix ...string) []bob.Expression {
 		}})
 	}
 
-	if s.Nickname != nil {
+	if s.DisplayName != nil {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			psql.Quote(append(prefix, "nickname")...),
-			psql.Arg(s.Nickname),
+			psql.Quote(append(prefix, "display_name")...),
+			psql.Arg(s.DisplayName),
 		}})
 	}
 

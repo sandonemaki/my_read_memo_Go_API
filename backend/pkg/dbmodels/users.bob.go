@@ -24,12 +24,12 @@ import (
 
 // User is an object representing the database table.
 type User struct {
-	Ulid      string              `db:"ulid,pk" `
-	Nickname  string              `db:"nickname" `
-	DeletedAt sql.Null[time.Time] `db:"deleted_at" `
-	CreatedAt time.Time           `db:"created_at" `
-	UpdatedAt time.Time           `db:"updated_at" `
-	UID       string              `db:"uid" `
+	Ulid        string              `db:"ulid,pk" `
+	DisplayName string              `db:"display_name" `
+	DeletedAt   sql.Null[time.Time] `db:"deleted_at" `
+	CreatedAt   time.Time           `db:"created_at" `
+	UpdatedAt   time.Time           `db:"updated_at" `
+	UID         string              `db:"uid" `
 
 	R userR `db:"-" `
 }
