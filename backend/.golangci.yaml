@@ -1,10 +1,29 @@
 version: "2"
+
 run:
   go: '1.24.4'
+
 linters:
+  default: all
+  disable:
+    - exhaustruct
+    - gochecknoglobals
+    - gochecknoinits
+    - mnd
+    - wrapcheck
+
   exclusions:
-    paths:
-      - pkg/dbmodels/.*
-      - testutil/.*
-      - mock.go
-    generated: strict
+    generated: lax
+    rules:
+      - path: "pkg/dbmodels/.*"
+        linters:
+          - all
+      - path: "testutil/.*"
+        linters:
+          - all
+      - path: ".*mock.go"
+        linters:
+          - all
+      - text: "pp.*|pretty.*"
+        linters:
+          - all
