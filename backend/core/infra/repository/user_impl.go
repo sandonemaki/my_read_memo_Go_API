@@ -29,10 +29,10 @@ func NewUser(dbClient *db.Client) repository.User {
 // ポインタレシーバーメソッドは、ポインタ型でないとインターフェースを満たせない
 func (r *user) Create(ctx context.Context, user *model.User) (err error) {
 	setter := &dbmodels.UserSetter{
-		Ulid:      &user.Ulid,
-		UID:       &user.UID,
-		Nickname:  &user.Nickname,
-		DeletedAt: &user.DeletedAt,
+		Ulid:        &user.Ulid,
+		UID:         &user.UID,
+		DisplayName: &user.DisplayName,
+		DeletedAt:   &user.DeletedAt,
 	}
 
 	// Execによってbobがdb.Clientを呼び出し、データベースにユーザーを挿入する
@@ -50,7 +50,7 @@ func (r *user) Update(ctx context.Context, user *model.User) (ulid string, err e
 	// mods = append(mods, dbmodels.UpdateWhere.Users.Ulid.EQ(user.Ulid))
 	// mods = append(mods, dbmodels.UpdateWhere.Users.DeletedAt.IsNull())
 	setter := &dbmodels.UserSetter{
-		Nickname: &user.Nickname,
+		DisplayName: &user.DisplayName,
 	}
 
 	mods := dbmodels.UpdateWhere.Users.Ulid.EQ(user.Ulid)

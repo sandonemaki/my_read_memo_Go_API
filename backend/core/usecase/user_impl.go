@@ -30,8 +30,8 @@ func NewUser(
 func (u *User) Create(ctx context.Context, p input.CreateUser) (result *output.CreateUser, err error) {
 	// get user by ulid
 	user := &model.User{
-		UID:      p.UID,
-		Nickname: p.Nickname,
+		UID:         p.UID,
+		DisplayName: p.DisplayName,
 	}
 
 	if err := u.userRepo.Create(ctx, user); err != nil {
@@ -61,7 +61,7 @@ func (u *User) GetMe(ctx context.Context, input input.GetCurrentUserDetail) (res
 	}, nil
 }
 
-func (u *User) UpdateNickname(ctx context.Context, input input.UpdateUser) (result *output.UpdateUser, err error) {
+func (u *User) UpdateDisplayName(ctx context.Context, input input.UpdateUser) (result *output.UpdateUser, err error) {
 	// ulidを取得する
 	user, err := u.userQuery.GetByULID(ctx, query.UserGetQuery{
 		ULID: null.StringFrom(input.ULID),
@@ -71,7 +71,7 @@ func (u *User) UpdateNickname(ctx context.Context, input input.UpdateUser) (resu
 	}
 
 	// ユーザー情報を更新
-	user.Nickname = input.Nickname
+	user.DisplayName = input.DisplayName
 
 	// データベースを更新
 	var userUlid string
