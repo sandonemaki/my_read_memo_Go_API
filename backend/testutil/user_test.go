@@ -40,14 +40,14 @@ func TestUserCreation(t *testing.T) {
 		ctx := context.Background()
 		timestamp := time.Now().Unix()
 		testUser := &model.User{
-			Ulid:      fmt.Sprintf("test_%d", timestamp),
-			UID:       fmt.Sprintf("uid_%d", timestamp),
-			Nickname:  fmt.Sprintf("テストユーザー_%d", timestamp),
-			DeletedAt: sql.Null[time.Time]{},
+			Ulid:        fmt.Sprintf("test_%d", timestamp),
+			UID:         fmt.Sprintf("uid_%d", timestamp),
+			DisplayName: fmt.Sprintf("テストユーザー_%d", timestamp),
+			DeletedAt:   sql.Null[time.Time]{},
 		}
 
-		t.Logf("作成予定のユーザー: ULID=%s, UID=%s, Nickname=%s",
-			testUser.Ulid, testUser.UID, testUser.Nickname)
+		t.Logf("作成予定のユーザー: ULID=%s, UID=%s, DisplayName=%s",
+			testUser.Ulid, testUser.UID, testUser.DisplayName)
 
 		// Create操作をテスト
 		err := userRepo.Create(ctx, testUser)
@@ -56,7 +56,7 @@ func TestUserCreation(t *testing.T) {
 		}
 
 		t.Log("✅ ユーザー作成成功！")
-		t.Logf("🎉 作成されたユーザー: ULID=%s, UID=%s, Nickname=%s",
-			testUser.Ulid, testUser.UID, testUser.Nickname)
+		t.Logf("🎉 作成されたユーザー: ULID=%s, UID=%s, DisplayName=%s",
+			testUser.Ulid, testUser.UID, testUser.DisplayName)
 	})
 }
