@@ -35,12 +35,12 @@ func (mods UserModSlice) Apply(ctx context.Context, n *UserTemplate) {
 // UserTemplate is an object representing the database table.
 // all columns are optional and should be set by mods
 type UserTemplate struct {
-	Ulid      func() string
-	Nickname  func() string
-	DeletedAt func() sql.Null[time.Time]
-	CreatedAt func() time.Time
-	UpdatedAt func() time.Time
-	UID       func() string
+	Ulid        func() string
+	DisplayName func() string
+	DeletedAt   func() sql.Null[time.Time]
+	CreatedAt   func() time.Time
+	UpdatedAt   func() time.Time
+	UID         func() string
 
 	r userR
 	f *Factory
@@ -106,9 +106,9 @@ func (o UserTemplate) BuildSetter() *models.UserSetter {
 		val := o.Ulid()
 		m.Ulid = &val
 	}
-	if o.Nickname != nil {
-		val := o.Nickname()
-		m.Nickname = &val
+	if o.DisplayName != nil {
+		val := o.DisplayName()
+		m.DisplayName = &val
 	}
 	if o.DeletedAt != nil {
 		val := o.DeletedAt()
@@ -151,8 +151,8 @@ func (o UserTemplate) Build() *models.User {
 	if o.Ulid != nil {
 		m.Ulid = o.Ulid()
 	}
-	if o.Nickname != nil {
-		m.Nickname = o.Nickname()
+	if o.DisplayName != nil {
+		m.DisplayName = o.DisplayName()
 	}
 	if o.DeletedAt != nil {
 		m.DeletedAt = o.DeletedAt()
@@ -340,7 +340,7 @@ type userMods struct{}
 func (m userMods) RandomizeAllColumns(f *faker.Faker) UserMod {
 	return UserModSlice{
 		UserMods.RandomUlid(f),
-		UserMods.RandomNickname(f),
+		UserMods.RandomDisplayName(f),
 		UserMods.RandomDeletedAt(f),
 		UserMods.RandomCreatedAt(f),
 		UserMods.RandomUpdatedAt(f),
@@ -380,31 +380,31 @@ func (m userMods) RandomUlid(f *faker.Faker) UserMod {
 }
 
 // Set the model columns to this value
-func (m userMods) Nickname(val string) UserMod {
+func (m userMods) DisplayName(val string) UserMod {
 	return UserModFunc(func(_ context.Context, o *UserTemplate) {
-		o.Nickname = func() string { return val }
+		o.DisplayName = func() string { return val }
 	})
 }
 
 // Set the Column from the function
-func (m userMods) NicknameFunc(f func() string) UserMod {
+func (m userMods) DisplayNameFunc(f func() string) UserMod {
 	return UserModFunc(func(_ context.Context, o *UserTemplate) {
-		o.Nickname = f
+		o.DisplayName = f
 	})
 }
 
 // Clear any values for the column
-func (m userMods) UnsetNickname() UserMod {
+func (m userMods) UnsetDisplayName() UserMod {
 	return UserModFunc(func(_ context.Context, o *UserTemplate) {
-		o.Nickname = nil
+		o.DisplayName = nil
 	})
 }
 
 // Generates a random value for the column using the given faker
 // if faker is nil, a default faker is used
-func (m userMods) RandomNickname(f *faker.Faker) UserMod {
+func (m userMods) RandomDisplayName(f *faker.Faker) UserMod {
 	return UserModFunc(func(_ context.Context, o *UserTemplate) {
-		o.Nickname = func() string {
+		o.DisplayName = func() string {
 			return random_string(f, "100")
 		}
 	})

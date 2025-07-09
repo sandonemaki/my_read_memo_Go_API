@@ -151,12 +151,12 @@ var ColumnNames = struct {
 		CreatedAt:    "created_at",
 	},
 	Users: userColumnNames{
-		Ulid:      "ulid",
-		Nickname:  "nickname",
-		DeletedAt: "deleted_at",
-		CreatedAt: "created_at",
-		UpdatedAt: "updated_at",
-		UID:       "uid",
+		Ulid:        "ulid",
+		DisplayName: "display_name",
+		DeletedAt:   "deleted_at",
+		CreatedAt:   "created_at",
+		UpdatedAt:   "updated_at",
+		UID:         "uid",
 	},
 }
 
