@@ -19,13 +19,10 @@ func NewUser(dbClient *db.Client) query.User {
 	return &user{dbClient}
 }
 
-func (r *user) GetByULID(ctx context.Context, query query.UserGetQuery) (user *model.User, err error) {
+func (r *user) GetByUID(ctx context.Context, query query.UserGetQuery) (user *model.User, err error) {
 
 	mods := []bob.Mod[*dialect.SelectQuery]{}
 
-	if query.ULID.Valid {
-		mods = append(mods, dbmodels.SelectWhere.Users.Ulid.EQ(query.ULID.String))
-	}
 	if query.UID.Valid {
 		mods = append(mods, dbmodels.SelectWhere.Users.UID.EQ(query.UID.String))
 	}

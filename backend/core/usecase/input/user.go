@@ -43,12 +43,13 @@ func (u *GetCurrentUserDetail) Validate() error {
 
 func NewUpdateUser(UID string, name string) UpdateUser {
 	return UpdateUser{
+		UID:         UID,
 		DisplayName: name,
 	}
 }
 
 type UpdateUser struct {
-	ULID        string `validate:"required"`
+	UID         string `validate:"required"`
 	DisplayName string `validate:"required"`
 }
 
@@ -59,14 +60,14 @@ func (u *UpdateUser) Validate() error {
 	return nil
 }
 
-func NewDeleteUser(ULID string) DeleteUser {
+func NewDeleteUser(UID string) DeleteUser {
 	return DeleteUser{
-		ULID: ULID,
+		UID: UID,
 	}
 }
 
 type DeleteUser struct {
-	ULID string `validate:"required"`
+	UID string `validate:"required"`
 }
 
 func (u *DeleteUser) Validate() error {

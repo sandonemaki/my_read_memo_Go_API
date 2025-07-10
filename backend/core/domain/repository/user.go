@@ -8,6 +8,6 @@ import (
 
 type User interface {
 	Create(ctx context.Context, user *model.User) (err error)
-	Update(ctx context.Context, user *model.User) (ulid string, err error)
-	Delete(ctx context.Context, userULID string) (err error)
+	Update(ctx context.Context, user *model.User) (userUID string, err error)
+	Delete(ctx context.Context, userUID string) (err error)
 }

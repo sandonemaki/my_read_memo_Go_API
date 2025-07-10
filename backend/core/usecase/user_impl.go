@@ -12,7 +12,7 @@ import (
 	"github.com/volatiletech/null"
 )
 
-type User struct {
+type user struct {
 	userQuery query.User
 	userRepo  repository.User
 }
@@ -20,14 +20,14 @@ type User struct {
 // NewUser creates a new User usecase instance
 func NewUser(
 	userQuery query.User,
-	userRepo repository.User) *User {
-	return &User{
+	userRepo repository.User) User {
+	return &user{
 		userQuery: userQuery,
 		userRepo:  userRepo,
 	}
 }
 
-func (u *User) Create(ctx context.Context, p input.CreateUser) (result *output.CreateUser, err error) {
+func (u *user) Create(ctx context.Context, p input.CreateUser) (result *output.CreateUser, err error) {
 	// get user by ulid
 	user := &model.User{
 		UID:         p.UID,
@@ -43,14 +43,14 @@ func (u *User) Create(ctx context.Context, p input.CreateUser) (result *output.C
 	}, nil
 }
 
-func (u *User) GetMe(ctx context.Context, input input.GetCurrentUserDetail) (result *output.GetUser, err error) {
+func (u *user) GetCurrentUser(ctx context.Context, input input.GetCurrentUserDetail) (result *output.GetUser, err error) {
 	var user *model.User
 	if err := input.Validate(); err != nil {
 		return nil, err
 	}
 
-	user, err = u.userQuery.GetByULID(ctx, query.UserGetQuery{
-		ULID: null.StringFrom(input.UID),
+	user, err = u.userQuery.GetByUID(ctx, query.UserGetQuery{
+		UID: null.StringFrom(input.UID),
 	})
 	if err != nil {
 		return nil, err
@@ -61,10 +61,10 @@ func (u *User) GetMe(ctx context.Context, input input.GetCurrentUserDetail) (res
 	}, nil
 }
 
-func (u *User) UpdateDisplayName(ctx context.Context, input input.UpdateUser) (result *output.UpdateUser, err error) {
-	// ulidを取得する
-	user, err := u.userQuery.GetByULID(ctx, query.UserGetQuery{
-		ULID: null.StringFrom(input.ULID),
+func (u *user) UpdateCurrentUser(ctx context.Context, input input.UpdateUser) (result *output.UpdateUser, err error) {
+	var user *model.User
+	user, err = u.userQuery.GetByUID(ctx, query.UserGetQuery{
+		UID: null.StringFrom(input.UID),
 	})
 	if err != nil {
 		return nil, err
@@ -74,15 +74,14 @@ func (u *User) UpdateDisplayName(ctx context.Context, input input.UpdateUser) (r
 	user.DisplayName = input.DisplayName
 
 	// データベースを更新
-	var userUlid string
-	userUlid, err = u.userRepo.Update(ctx, user)
+	_, err = u.userRepo.Update(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 
 	// 更新後のユーザー情報を取得
-	updatedUser, err := u.userQuery.GetByULID(ctx, query.UserGetQuery{
-		ULID: null.StringFrom(userUlid),
+	updatedUser, err := u.userQuery.GetByUID(ctx, query.UserGetQuery{
+		UID: null.StringFrom(input.UID),
 	})
 	if err != nil {
 		return nil, err
@@ -93,7 +92,10 @@ func (u *User) UpdateDisplayName(ctx context.Context, input input.UpdateUser) (r
 	}, nil
 }
 
-func (u *User) Delete(ctx context.Context, input input.DeleteUser) (err error) {
-	// ulidを取得する
-	return u.userRepo.Delete(ctx, input.ULID)
+func (u *user) Delete(ctx context.Context, input input.DeleteUser) (err error) {
+	if err := u.userRepo.Delete(ctx, input.UID); err != nil {
+		return err
+	}
+
+	return nil
 }

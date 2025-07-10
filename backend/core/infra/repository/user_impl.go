@@ -64,10 +64,12 @@ func (r *user) Update(ctx context.Context, user *model.User) (ulid string, err e
 }
 
 // Deleteメソッドの実装
-func (r *user) Delete(ctx context.Context, ulid string) (err error) {
-	mods := dbmodels.UpdateWhere.Users.Ulid.EQ(ulid)
-	now := sql.Null[time.Time]{V: time.Now(), Valid: true}
-	_, err = dbmodels.Users.Update(dbmodels.UserSetter{DeletedAt: &now}.UpdateMod(), mods).Exec(ctx, r.dbClient)
+func (r *user) Delete(ctx context.Context, uid string) (err error) {
+	mods := dbmodels.UpdateWhere.Users.UID.EQ(uid)
+	now := time.Now()
+	deletedTime := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	deletedAt := sql.Null[time.Time]{V: deletedTime, Valid: true}
+	_, err = dbmodels.Users.Update(dbmodels.UserSetter{DeletedAt: &deletedAt}.UpdateMod(), mods).Exec(ctx, r.dbClient)
 	if err != nil {
 		return err
 	}
