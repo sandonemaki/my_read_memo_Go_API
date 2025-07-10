@@ -1,0 +1,8 @@
+- ulid: 01ARZ3NDEKTSV4RRFFQ69G5FAV
+  uid: firebase_uid_123
+  displayName: 正常なテストユーザー
+  deletedAt: null
+- ulid: 01ARZ3NDEKTSV4RRFFQ69G5FBW
+  uid: firebase_uid_456
+  displayName: 削除済みテストユーザー
+  deletedAt: 2025-07-10
