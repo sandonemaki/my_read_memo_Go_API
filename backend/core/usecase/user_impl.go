@@ -50,7 +50,7 @@ func (u *User) GetMe(ctx context.Context, input input.GetCurrentUserDetail) (res
 	}
 
 	user, err = u.userQuery.GetByULID(ctx, query.UserGetQuery{
-		ULID: null.StringFrom(input.UID),
+		UID: null.StringFrom(input.UID),
 	})
 	if err != nil {
 		return nil, err
