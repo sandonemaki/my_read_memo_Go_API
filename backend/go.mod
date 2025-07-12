@@ -4,10 +4,14 @@ go 1.24.4
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
+	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/DATA-DOG/go-txdb v0.2.1
 	github.com/go-playground/validator/v10 v10.27.0
+	github.com/golang/mock v1.6.0
+	github.com/google/go-cmp v0.7.0
 	github.com/jaswdr/faker/v2 v2.5.0
 	github.com/lib/pq v1.10.9
+	github.com/oklog/ulid/v2 v2.1.1
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.20.1
 	github.com/stephenafamo/bob v0.38.0

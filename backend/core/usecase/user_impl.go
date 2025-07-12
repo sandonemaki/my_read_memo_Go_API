@@ -2,7 +2,10 @@ package usecase
 
 import (
 	"context"
+	"crypto/rand"
+	"time"
 
+	"github.com/oklog/ulid/v2"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/model"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/query"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/repository"
@@ -28,8 +31,11 @@ func NewUser(
 }
 
 func (u *user) Create(ctx context.Context, p input.CreateUser) (result *output.CreateUser, err error) {
-	// get user by ulid
+	// Generate ULID - テスト用に一時的に固定値
+	ulidValue := ulid.MustNew(ulid.Timestamp(time.Now()), rand.Reader)
+	
 	user := &model.User{
+		Ulid:        ulidValue.String(),
 		UID:         p.UID,
 		DisplayName: p.DisplayName,
 	}
@@ -38,8 +44,16 @@ func (u *user) Create(ctx context.Context, p input.CreateUser) (result *output.C
 		return nil, err
 	}
 
+	// INSERT後にGETして実際のデータベースの値を取得（見本パターン）
+	createdUser, err := u.userQuery.GetByUID(ctx, query.UserGetQuery{
+		UID: null.StringFrom(user.UID),
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	return &output.CreateUser{
-		User: user,
+		User: createdUser, // GETした結果を返す（mockの固定値）
 	}, nil
 }
 
