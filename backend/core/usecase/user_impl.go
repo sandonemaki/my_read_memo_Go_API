@@ -31,6 +31,11 @@ func NewUser(
 }
 
 func (u *user) Create(ctx context.Context, p input.CreateUser) (result *output.CreateUser, err error) {
+	// バリデーション実行
+	if err := p.Validate(); err != nil {
+		return nil, err
+	}
+
 	// Generate ULID - テスト用に一時的に固定値
 	ulidValue := ulid.MustNew(ulid.Timestamp(time.Now()), rand.Reader)
 	
