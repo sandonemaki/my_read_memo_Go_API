@@ -9,10 +9,12 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/model"
+	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/query"
 	query_mock "github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/query/mock"
 	repository_mock "github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/repository/mock"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase/input"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase/output"
+	"github.com/volatiletech/null"
 )
 
 func TestMockCreateUser(t *testing.T) {
@@ -71,11 +73,28 @@ func TestMockCreateUser(t *testing.T) {
 			// モックの期待値設定
 			if v.wantErr != nil {
 				// エラーケース: Createでエラーを返し、GetByUIDは呼ばれない
-				userRepo.EXPECT().Create(gomock.Any(), gomock.Any()).Return(v.wantErr)
+				// input→model変換が正しく行われるかを検証
+				expectedUser := &model.User{
+					Ulid:        v.params.Ulid,
+					UID:         v.params.UID,
+					DisplayName: v.params.DisplayName,
+				}
+				userRepo.EXPECT().Create(gomock.Any(), expectedUser).Return(v.wantErr)
 			} else {
 				// 正常ケース: Createは成功、GetByUIDで結果を返す
-				userRepo.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil)
-				userQuery.EXPECT().GetByUID(gomock.Any(), gomock.Any()).Return(v.expected.User, nil)
+				// input→model変換が正しく行われるかを検証
+				expectedUser := &model.User{
+					Ulid:        v.params.Ulid,
+					UID:         v.params.UID,
+					DisplayName: v.params.DisplayName,
+				}
+				userRepo.EXPECT().Create(gomock.Any(), expectedUser).Return(nil)
+				
+				// GetByUIDに正しいクエリが渡されるかを検証
+				expectedQuery := query.UserGetQuery{
+					UID: null.StringFrom(v.params.UID),
+				}
+				userQuery.EXPECT().GetByUID(gomock.Any(), expectedQuery).Return(v.expected.User, nil)
 			}
 
 			// usecaseを作成
@@ -152,12 +171,17 @@ func TestMockGetCurrentUser(t *testing.T) {
 			userRepo := repository_mock.NewMockUser(ctrl)
 
 			// モックの期待値設定
+			// input→query変換が正しく行われるかを検証
+			expectedQuery := query.UserGetQuery{
+				UID: null.StringFrom(v.params.UID),
+			}
+			
 			if v.wantErr != nil {
 				// エラーケース: GetByUIDでエラーを返す
-				userQuery.EXPECT().GetByUID(gomock.Any(), gomock.Any()).Return(nil, v.wantErr)
+				userQuery.EXPECT().GetByUID(gomock.Any(), expectedQuery).Return(nil, v.wantErr)
 			} else {
 				// 正常ケース: GetByUIDでユーザーを返す
-				userQuery.EXPECT().GetByUID(gomock.Any(), gomock.Any()).Return(v.expected.User, nil)
+				userQuery.EXPECT().GetByUID(gomock.Any(), expectedQuery).Return(v.expected.User, nil)
 			}
 
 			// usecaseを作成
