@@ -36,6 +36,9 @@ func TestCreateUser(t *testing.T) {
 	// データベース接続
 	sqlDB := setupTestDB(t)
 	defer sqlDB.Close()
+	
+	// テスト終了後のクリーンアップ
+	defer cleanupTestData(t, sqlDB)
 
 	// vectors構造の導入
 	vectors := map[string]struct {
@@ -76,8 +79,8 @@ func TestCreateUser(t *testing.T) {
 
 	for k, v := range vectors {
 		t.Run(k, func(t *testing.T) {
-			// 依存関係のセットアップ
-			dbClient := db.NewClient(sqlDB)
+			// 依存関係のセットアップ（元の実装を維持）
+			dbClient := db.NewClient(sqlDB) // use the *sql.DB instance, not tx
 			userQuery := queryImpl.NewUser(&dbClient)
 			userRepo := repositoryImpl.NewUser(&dbClient)
 
@@ -110,6 +113,16 @@ func TestCreateUser(t *testing.T) {
 					result.User.Ulid, result.User.UID, result.User.DisplayName)
 			}
 		})
+	}
+}
+
+// cleanupTestData はテスト用データを削除します
+func cleanupTestData(t *testing.T, sqlDB *sql.DB) {
+	_, err := sqlDB.Exec("DELETE FROM users WHERE uid LIKE '%test%' OR uid LIKE '%integration%'")
+	if err != nil {
+		t.Logf("クリーンアップエラー（無視されます）: %v", err)
+	} else {
+		t.Log("✅ テストデータクリーンアップ完了")
 	}
 }
 
