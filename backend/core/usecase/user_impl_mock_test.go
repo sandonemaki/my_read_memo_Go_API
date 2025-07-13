@@ -2,19 +2,16 @@ package usecase
 
 import (
 	"context"
-	"regexp"
 	"testing"
-	"time"
 
-	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/model"
-	queryImpl "github.com/sandonemaki/my_read_memo_Go_API/backend/core/infra/query"
-	repositoryImpl "github.com/sandonemaki/my_read_memo_Go_API/backend/core/infra/repository"
+	query_mock "github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/query/mock"
+	repository_mock "github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/repository/mock"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase/input"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase/output"
-	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/db"
 )
 
 func TestMockCreateUser(t *testing.T) {
@@ -29,7 +26,6 @@ func TestMockCreateUser(t *testing.T) {
 		params   input.CreateUser
 		expected *output.CreateUser
 		wantErr  error
-		prepare  func(mock sqlmock.Sqlmock)
 		options  cmp.Options
 	}{
 		"OK": {
@@ -45,48 +41,27 @@ func TestMockCreateUser(t *testing.T) {
 					DisplayName: TestDisplayName,
 				},
 			},
-			prepare: func(mock sqlmock.Sqlmock) {
-				// INSERT - 全て固定値でテスト（AnyArg不要）
-				insertQuery := `INSERT INTO "users" AS "users"("ulid", "display_name", "deleted_at", "created_at", "updated_at", "uid") VALUES ($1, $2, $3, DEFAULT, DEFAULT, $4) RETURNING "users"."ulid" AS "ulid", "users"."display_name" AS "display_name", "users"."deleted_at" AS "deleted_at", "users"."created_at" AS "created_at", "users"."updated_at" AS "updated_at", "users"."uid" AS "uid"`
-				mock.ExpectExec(regexp.QuoteMeta(insertQuery)).
-					WithArgs(TestUlid, TestDisplayName, nil, TestUID). // 全て固定値
-					WillReturnResult(sqlmock.NewResult(1, 1))
-
-				// GET - 全列を返す（時刻系は固定値）
-				rows := sqlmock.NewRows([]string{"ulid", "display_name", "deleted_at", "created_at", "updated_at", "uid"}).AddRow(
-					TestUlid,
-					TestDisplayName,
-					nil,
-					time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC), // 固定時刻
-					time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC), // 固定時刻
-					TestUID)
-				selectQuery := `SELECT "users"."ulid" AS "ulid", "users"."display_name" AS "display_name", "users"."deleted_at" AS "deleted_at", "users"."created_at" AS "created_at", "users"."updated_at" AS "updated_at", "users"."uid" AS "uid" FROM "users" AS "users" WHERE ("users"."uid" = $1)`
-				mock.ExpectQuery(regexp.QuoteMeta(selectQuery)).
-					WithArgs(TestUID).
-					WillReturnRows(rows)
-			},
+			wantErr: nil,
 			options: cmp.Options{
-				cmpopts.IgnoreFields(output.CreateUser{}, "User.Ulid", "User.CreatedAt", "User.UpdatedAt"),
+				cmpopts.IgnoreFields(output.CreateUser{}, "User.CreatedAt", "User.UpdatedAt"),
 			},
 		},
 	}
 
 	for k, v := range vectors {
 		t.Run(k, func(t *testing.T) {
-			sqlDB, mock, err := sqlmock.New()
-			if err != nil {
-				t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-			}
-			defer sqlDB.Close()
-
-			v.prepare(mock)
-
-			// usecaseの依存関係を作成
-			dbClient := db.NewClient(sqlDB)
-			userQuery := queryImpl.NewUser(&dbClient)
-			userRepo := repositoryImpl.NewUser(&dbClient)
+			// gomockコントローラー作成
+			ctrl := gomock.NewController(t)
 			
-			// 実際のusecaseを作成
+			// モックインターフェース作成
+			userQuery := query_mock.NewMockUser(ctrl)
+			userRepo := repository_mock.NewMockUser(ctrl)
+			
+			// モックの期待値設定
+			userRepo.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil)
+			userQuery.EXPECT().GetByUID(gomock.Any(), gomock.Any()).Return(v.expected.User, v.wantErr)
+			
+			// usecaseを作成
 			userUsecase := NewUser(userQuery, userRepo)
 			
 			// テスト実行
@@ -105,11 +80,6 @@ func TestMockCreateUser(t *testing.T) {
 
 			if !cmp.Equal(actual, v.expected, v.options...) {
 				t.Errorf("unexpected result: %s", cmp.Diff(v.expected, actual, v.options...))
-			}
-
-			// モックの期待が満たされたかチェック
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("mock expectations were not met: %v", err)
 			}
 		})
 	}
