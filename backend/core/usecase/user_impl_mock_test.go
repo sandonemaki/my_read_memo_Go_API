@@ -168,7 +168,7 @@ func TestMockGetCurrentUser(t *testing.T) {
 
 			// モックインターフェース作成
 			userQuery := query_mock.NewMockUser(ctrl)
-			userRepo := repository_mock.NewMockUser(ctrl)
+			userRepo := repository_mock.NewMockUser(ctrl) // 使用しないが、NewUserに必要
 
 			// モックの期待値設定
 			// input→query変換が正しく行われるかを検証
