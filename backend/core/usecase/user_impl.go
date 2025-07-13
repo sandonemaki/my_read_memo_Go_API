@@ -2,10 +2,7 @@ package usecase
 
 import (
 	"context"
-	"crypto/rand"
-	"time"
 
-	"github.com/oklog/ulid/v2"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/model"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/query"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/repository"
@@ -31,16 +28,16 @@ func NewUser(
 }
 
 func (u *user) Create(ctx context.Context, p input.CreateUser) (result *output.CreateUser, err error) {
+	// デフォルト値設定（見本に従う）
+	p.SetDefaults()
+
 	// バリデーション実行
 	if err := p.Validate(); err != nil {
 		return nil, err
 	}
 
-	// Generate ULID - テスト用に一時的に固定値
-	ulidValue := ulid.MustNew(ulid.Timestamp(time.Now()), rand.Reader)
-	
 	user := &model.User{
-		Ulid:        ulidValue.String(),
+		Ulid:        p.Ulid,  // input層で生成されたULIDを使用
 		UID:         p.UID,
 		DisplayName: p.DisplayName,
 	}

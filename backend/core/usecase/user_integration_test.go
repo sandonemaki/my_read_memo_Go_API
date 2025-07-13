@@ -46,19 +46,21 @@ func TestCreateUser(t *testing.T) {
 	}{
 		"OK": {
 			params: input.CreateUser{
-				UID:         "integration_test_uid_001",
-				DisplayName: "統合テストユーザー001",
+				Ulid:        "01HWEB0000000000000000001", // 新しい固定ULID（重複回避）
+				UID:         "integration_test_uid_fixed_ulid_001", // 新しい固定UID（重複回避）
+				DisplayName: "固定ULID統合テストユーザー001",
 			},
 			expected: &output.CreateUser{
 				User: &model.User{
-					UID:         "integration_test_uid_001",
-					DisplayName: "統合テストユーザー001",
-					// Ulid, CreatedAt, UpdatedAtは動的値なので期待値には含めない
+					Ulid:        "01HWEB0000000000000000001", // 新しい固定ULID
+					UID:         "integration_test_uid_fixed_ulid_001",
+					DisplayName: "固定ULID統合テストユーザー001",
+					// CreatedAt, UpdatedAtは動的値なので期待値には含めない
 				},
 			},
 			wantErr: nil,
 			options: cmp.Options{
-				cmpopts.IgnoreFields(output.CreateUser{}, "User.Ulid", "User.CreatedAt", "User.UpdatedAt"),
+				cmpopts.IgnoreFields(output.CreateUser{}, "User.CreatedAt", "User.UpdatedAt"), // Ulidを除外から削除
 			},
 		},
 		"UID空文字列エラー": {
