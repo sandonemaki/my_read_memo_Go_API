@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/oklog/ulid/v2"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/model"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/repository"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/db"
@@ -28,6 +29,11 @@ func NewUser(dbClient *db.Client) repository.User {
 // インターフェースrepository.Userも実装する必要がある
 // ポインタレシーバーメソッドは、ポインタ型でないとインターフェースを満たせない
 func (r *user) Create(ctx context.Context, user *model.User) (err error) {
+	// ULIDが設定されていない場合は新しく生成
+	if user.Ulid == "" {
+		user.Ulid = ulid.Make().String()
+	}
+
 	setter := &dbmodels.UserSetter{
 		Ulid:        &user.Ulid,
 		UID:         &user.UID,
