@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -21,7 +22,7 @@ func TestMockCreateUser(t *testing.T) {
 		TestDisplayName = "テストユーザー001"
 		TestUlid        = "TEST123456789ABCDEF"
 	)
-	
+
 	vectors := map[string]struct {
 		params   input.CreateUser
 		expected *output.CreateUser
@@ -46,24 +47,40 @@ func TestMockCreateUser(t *testing.T) {
 				cmpopts.IgnoreFields(output.CreateUser{}, "User.CreatedAt", "User.UpdatedAt"),
 			},
 		},
+		"DuplicateULID": {
+			params: input.CreateUser{
+				Ulid:        TestUlid,       // 同じULIDを使用
+				UID:         "test_uid_002", // 異なるUID
+				DisplayName: "テストユーザー002",
+			},
+			expected: nil,                                                // エラーの場合は期待値なし
+			wantErr:  errors.New("UNIQUE constraint failed: users.ulid"), // 重複エラー
+			options:  cmp.Options{},
+		},
 	}
 
 	for k, v := range vectors {
 		t.Run(k, func(t *testing.T) {
 			// gomockコントローラー作成
 			ctrl := gomock.NewController(t)
-			
+
 			// モックインターフェース作成
 			userQuery := query_mock.NewMockUser(ctrl)
 			userRepo := repository_mock.NewMockUser(ctrl)
-			
+
 			// モックの期待値設定
-			userRepo.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil)
-			userQuery.EXPECT().GetByUID(gomock.Any(), gomock.Any()).Return(v.expected.User, v.wantErr)
-			
+			if v.wantErr != nil {
+				// エラーケース: Createでエラーを返し、GetByUIDは呼ばれない
+				userRepo.EXPECT().Create(gomock.Any(), gomock.Any()).Return(v.wantErr)
+			} else {
+				// 正常ケース: Createは成功、GetByUIDで結果を返す
+				userRepo.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil)
+				userQuery.EXPECT().GetByUID(gomock.Any(), gomock.Any()).Return(v.expected.User, nil)
+			}
+
 			// usecaseを作成
 			userUsecase := NewUser(userQuery, userRepo)
-			
+
 			// テスト実行
 			actual, err := userUsecase.Create(context.Background(), v.params)
 
