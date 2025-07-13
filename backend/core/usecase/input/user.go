@@ -1,6 +1,10 @@
 package input
 
 import (
+	"crypto/rand"
+	"time"
+
+	"github.com/oklog/ulid/v2"
 	"github.com/pkg/errors"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/errof"
 )
@@ -13,8 +17,16 @@ func NewCreateUser(UID string, name string) CreateUser {
 }
 
 type CreateUser struct {
+	Ulid        string `validate:""`
 	UID         string `validate:"required"`
 	DisplayName string `validate:"required"`
+}
+
+// SetDefaults はデフォルト値を設定します（見本に従う）
+func (i *CreateUser) SetDefaults() {
+	if i.Ulid == "" {
+		i.Ulid = ulid.MustNew(ulid.Timestamp(time.Now()), rand.Reader).String()
+	}
 }
 
 func (u *CreateUser) Validate() error {

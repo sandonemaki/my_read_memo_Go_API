@@ -28,8 +28,16 @@ func NewUser(
 }
 
 func (u *user) Create(ctx context.Context, p input.CreateUser) (result *output.CreateUser, err error) {
-	// get user by ulid
+	// デフォルト値設定（見本に従う）
+	p.SetDefaults()
+
+	// バリデーション実行
+	if err := p.Validate(); err != nil {
+		return nil, err
+	}
+
 	user := &model.User{
+		Ulid:        p.Ulid,  // input層で生成されたULIDを使用
 		UID:         p.UID,
 		DisplayName: p.DisplayName,
 	}
@@ -38,8 +46,16 @@ func (u *user) Create(ctx context.Context, p input.CreateUser) (result *output.C
 		return nil, err
 	}
 
+	// INSERT後にGETして実際のデータベースの値を取得（見本パターン）
+	createdUser, err := u.userQuery.GetByUID(ctx, query.UserGetQuery{
+		UID: null.StringFrom(user.UID),
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	return &output.CreateUser{
-		User: user,
+		User: createdUser, // GETした結果を返す（mockの固定値）
 	}, nil
 }
 
