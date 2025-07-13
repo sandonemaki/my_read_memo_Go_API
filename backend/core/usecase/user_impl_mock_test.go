@@ -34,6 +34,7 @@ func TestMockCreateUser(t *testing.T) {
 	}{
 		"OK": {
 			params: input.CreateUser{
+				Ulid:        TestUlid, // 固定ULIDを追加
 				UID:         TestUID,
 				DisplayName: TestDisplayName,
 			},
@@ -45,10 +46,10 @@ func TestMockCreateUser(t *testing.T) {
 				},
 			},
 			prepare: func(mock sqlmock.Sqlmock) {
-				// INSERT - 混在パターンをテスト（固定値 + AnyArg）
+				// INSERT - 全て固定値でテスト（AnyArg不要）
 				insertQuery := `INSERT INTO "users" AS "users"("ulid", "display_name", "deleted_at", "created_at", "updated_at", "uid") VALUES ($1, $2, $3, DEFAULT, DEFAULT, $4) RETURNING "users"."ulid" AS "ulid", "users"."display_name" AS "display_name", "users"."deleted_at" AS "deleted_at", "users"."created_at" AS "created_at", "users"."updated_at" AS "updated_at", "users"."uid" AS "uid"`
 				mock.ExpectExec(regexp.QuoteMeta(insertQuery)).
-					WithArgs(sqlmock.AnyArg(), TestDisplayName, nil, TestUID).
+					WithArgs(TestUlid, TestDisplayName, nil, TestUID). // 全て固定値
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
 				// GET - 全列を返す（時刻系は固定値）
