@@ -107,7 +107,7 @@ func TestMockCreateUser(t *testing.T) {
 			if err != nil {
 				if v.wantErr == nil {
 					t.Fatalf("unexpected error: %v", err)
-				} else if v.wantErr.Error() != err.Error() {
+				} else if !errors.Is(err, v.wantErr) {
 					t.Fatalf("expected error: %v, got: %v", v.wantErr, err)
 				}
 			} else if v.wantErr != nil {
@@ -194,7 +194,7 @@ func TestMockGetCurrentUser(t *testing.T) {
 			if err != nil {
 				if v.wantErr == nil {
 					t.Fatalf("unexpected error: %v", err)
-				} else if v.wantErr.Error() != err.Error() {
+				} else if !errors.Is(err, v.wantErr) {
 					t.Fatalf("expected error: %v, got: %v", v.wantErr, err)
 				}
 			} else if v.wantErr != nil {
