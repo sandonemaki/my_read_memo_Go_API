@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -17,12 +18,18 @@ import (
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/db"
 )
 
-// テスト用のデータベース接続文字列
-const testDSN = "postgres://yondeco:yondeco@localhost:5432/yondeco?sslmode=disable"
+// getTestDSN はテスト用のデータベース接続文字列を取得します（セキュリティ対応）
+func getTestDSN() string {
+	if dsn := os.Getenv("TEST_DATABASE_URL"); dsn != "" {
+		return dsn
+	}
+	// フォールバック（ローカル開発用）
+	return "postgres://yondeco:yondeco@localhost:5432/yondeco?sslmode=disable"
+}
 
 // setupTestDB はテスト用のデータベース接続を提供します
 func setupTestDB(t *testing.T) *sql.DB {
-	sqlDB, err := sql.Open("postgres", testDSN)
+	sqlDB, err := sql.Open("postgres", getTestDSN())
 	if err != nil {
 		t.Fatalf("データベース接続エラー: %v", err)
 	}
@@ -72,7 +79,7 @@ func TestCreateUser(t *testing.T) {
 				DisplayName: "テストユーザー",
 			},
 			expected: nil, // エラーケースなので期待値なし
-			wantErr:  fmt.Errorf("expected error"), // エラーを期待（見本通り）
+			wantErr:  fmt.Errorf("validation failed"), // バリデーションエラーを期待
 			options:  cmp.Options{},
 		},
 	}
@@ -190,7 +197,7 @@ func TestUserUsecase_GetCurrentUser(t *testing.T) {
 				UID: "non_existent_uid", // 存在しないUID
 			},
 			expected: nil,
-			wantErr:  fmt.Errorf("expected error"),
+			wantErr:  fmt.Errorf("user not found"), // More specific error expectation
 			options:  cmp.Options{},
 		},
 		"UID空文字列エラー": {
@@ -198,7 +205,7 @@ func TestUserUsecase_GetCurrentUser(t *testing.T) {
 				UID: "", // 空文字列でバリデーションエラー
 			},
 			expected: nil,
-			wantErr:  fmt.Errorf("expected error"),
+			wantErr:  fmt.Errorf("validation failed"), // Validation error expectation
 			options:  cmp.Options{},
 		},
 	}
