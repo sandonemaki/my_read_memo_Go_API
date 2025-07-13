@@ -111,31 +111,57 @@ func TestCreateUser(t *testing.T) {
 	}
 }
 
+// setupTestUsers はテスト用のユーザーデータを事前作成します
+func setupTestUsers(t *testing.T, sqlDB *sql.DB) {
+	dbClient := db.NewClient(sqlDB)
+	userQuery := queryImpl.NewUser(&dbClient)
+	userRepo := repositoryImpl.NewUser(&dbClient)
+	userUsecase := NewUser(userQuery, userRepo)
+	ctx := context.Background()
+
+	// テスト用ユーザーを事前作成
+	testUsers := []input.CreateUser{
+		{
+			UID:         "pre_created_test_uid_001",
+			DisplayName: "事前作成ユーザー001",
+		},
+		{
+			UID:         "pre_created_test_uid_002", 
+			DisplayName: "事前作成ユーザー002",
+		},
+	}
+
+	for _, user := range testUsers {
+		_, err := userUsecase.Create(ctx, user)
+		if err != nil {
+			t.Fatalf("事前ユーザー作成エラー: %v", err)
+		}
+	}
+}
+
 func TestUserUsecase_GetCurrentUser(t *testing.T) {
 	// データベース接続
 	sqlDB := setupTestDB(t)
 	defer sqlDB.Close()
 
-	// vectors構造の導入
+	// 事前にテストデータを作成
+	setupTestUsers(t, sqlDB)
+
+	// vectors構造（Getのテストのみに集中）
 	vectors := map[string]struct {
-		setupUser   *input.CreateUser             // 事前作成用のユーザー（nilの場合はセットアップなし）
-		params      input.GetCurrentUserDetail   // 取得時のパラメータ
-		expected    *output.GetUser              // 期待する結果
-		wantErr     error
-		options     cmp.Options
+		params   input.GetCurrentUserDetail   // 取得時のパラメータ
+		expected *output.GetUser              // 期待する結果
+		wantErr  error
+		options  cmp.Options
 	}{
 		"OK": {
-			setupUser: &input.CreateUser{
-				UID:         "integration_get_test_uid_001",
-				DisplayName: "取得テストユーザー001",
-			},
 			params: input.GetCurrentUserDetail{
-				UID: "integration_get_test_uid_001",
+				UID: "pre_created_test_uid_001", // 事前作成済みのUID
 			},
 			expected: &output.GetUser{
 				User: &model.User{
-					UID:         "integration_get_test_uid_001",
-					DisplayName: "取得テストユーザー001",
+					UID:         "pre_created_test_uid_001",
+					DisplayName: "事前作成ユーザー001",
 					// Ulid, CreatedAt, UpdatedAtは動的値なので期待値には含めない
 				},
 			},
@@ -144,8 +170,15 @@ func TestUserUsecase_GetCurrentUser(t *testing.T) {
 				cmpopts.IgnoreFields(output.GetUser{}, "User.Ulid", "User.CreatedAt", "User.UpdatedAt"),
 			},
 		},
+		"存在しないUIDエラー": {
+			params: input.GetCurrentUserDetail{
+				UID: "non_existent_uid", // 存在しないUID
+			},
+			expected: nil,
+			wantErr:  fmt.Errorf("expected error"),
+			options:  cmp.Options{},
+		},
 		"UID空文字列エラー": {
-			setupUser: nil, // セットアップなし
 			params: input.GetCurrentUserDetail{
 				UID: "", // 空文字列でバリデーションエラー
 			},
@@ -166,15 +199,7 @@ func TestUserUsecase_GetCurrentUser(t *testing.T) {
 			var userUsecase User = NewUser(userQuery, userRepo)
 			ctx := context.Background()
 
-			// 事前データ作成（必要な場合のみ）
-			if v.setupUser != nil {
-				_, err := userUsecase.Create(ctx, *v.setupUser)
-				if err != nil {
-					t.Fatalf("事前ユーザー作成エラー: %v", err)
-				}
-			}
-
-			// GetCurrentUserのテスト実行
+			// GetCurrentUserのテスト実行（事前データありき）
 			result, err := userUsecase.GetCurrentUser(ctx, v.params)
 
 			// エラー検証（エラー発生の有無のみチェック）
