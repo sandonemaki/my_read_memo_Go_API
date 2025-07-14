@@ -4,7 +4,6 @@ go 1.24.4
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
-	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/DATA-DOG/go-txdb v0.2.1
 	github.com/go-playground/validator/v10 v10.27.0
 	github.com/golang/mock v1.6.0
