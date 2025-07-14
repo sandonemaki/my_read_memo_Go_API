@@ -3,8 +3,8 @@ package usecase
 import (
 	"context"
 	"errors"
-	"regexp"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/go-cmp/cmp"
@@ -21,6 +21,9 @@ func TestMockCreateUser(t *testing.T) {
 		TestDisplayName = "テストユーザー001"
 		TestUlid        = "TEST123456789ABCDEF"
 	)
+	
+	// 固定時刻
+	fixedTime := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	vectors := map[string]struct {
 		params   input.CreateUser
@@ -47,17 +50,17 @@ func TestMockCreateUser(t *testing.T) {
 				cmpopts.IgnoreFields(output.CreateUser{}, "User.CreatedAt", "User.UpdatedAt"),
 			},
 			prepare: func(mock sqlmock.Sqlmock) {
-				// INSERT期待値
-				insertQuery := `INSERT INTO "users" ("ulid","display_name","deleted_at","uid") VALUES ($1,$2,$3,$4)`
-				mock.ExpectExec(regexp.QuoteMeta(insertQuery)).
+				// INSERT期待値（Bob ORMの実際のSQL形式に合わせる）
+				insertQuery := `INSERT INTO "users" AS "users"\("ulid", "display_name", "deleted_at", "created_at", "updated_at", "uid"\) VALUES \(\$1, \$2, \$3, DEFAULT, DEFAULT, \$4\) RETURNING`
+				mock.ExpectExec(insertQuery).
 					WithArgs(TestUlid, TestDisplayName, nil, TestUID).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				
-				// SELECT期待値（GetByUID）
-				selectQuery := `SELECT "users".* FROM "users" WHERE ("users"."uid" = $1) LIMIT 1`
-				rows := sqlmock.NewRows([]string{"ulid", "display_name", "deleted_at", "uid"}).
-					AddRow(TestUlid, TestDisplayName, nil, TestUID)
-				mock.ExpectQuery(regexp.QuoteMeta(selectQuery)).
+				// SELECT期待値（GetByUID）- Bob ORMの実際のSQL形式に合わせる
+				selectQuery := `SELECT "users"\."ulid" AS "ulid", "users"\."display_name" AS "display_name", "users"\."deleted_at" AS "deleted_at", "users"\."created_at" AS "created_at", "users"\."updated_at" AS "updated_at", "users"\."uid" AS "uid" FROM "users" AS "users" WHERE \("users"\."uid" = \$1\)`
+				rows := sqlmock.NewRows([]string{"ulid", "display_name", "deleted_at", "created_at", "updated_at", "uid"}).
+					AddRow(TestUlid, TestDisplayName, nil, fixedTime, fixedTime, TestUID)
+				mock.ExpectQuery(selectQuery).
 					WithArgs(TestUID).
 					WillReturnRows(rows)
 			},
@@ -72,9 +75,9 @@ func TestMockCreateUser(t *testing.T) {
 			wantErr:  errors.New("UNIQUE constraint failed: users.ulid"), // 重複エラー
 			options:  cmp.Options{},
 			prepare: func(mock sqlmock.Sqlmock) {
-				// INSERT でエラーを返す
-				insertQuery := `INSERT INTO "users" ("ulid","display_name","deleted_at","uid") VALUES ($1,$2,$3,$4)`
-				mock.ExpectExec(regexp.QuoteMeta(insertQuery)).
+				// INSERT でエラーを返す（Bob ORMの実際のSQL形式に合わせる）
+				insertQuery := `INSERT INTO "users" AS "users"\("ulid", "display_name", "deleted_at", "created_at", "updated_at", "uid"\) VALUES \(\$1, \$2, \$3, DEFAULT, DEFAULT, \$4\) RETURNING`
+				mock.ExpectExec(insertQuery).
 					WithArgs(TestUlid, "テストユーザー002", nil, "test_uid_002").
 					WillReturnError(errors.New("UNIQUE constraint failed: users.ulid"))
 				
@@ -131,6 +134,9 @@ func TestMockGetCurrentUser(t *testing.T) {
 		TestDisplayName = "テストユーザー001"
 		TestUlid        = "TEST123456789ABCDEF"
 	)
+	
+	// 固定時刻
+	fixedTime := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	vectors := map[string]struct {
 		params   input.GetCurrentUserDetail
@@ -154,6 +160,15 @@ func TestMockGetCurrentUser(t *testing.T) {
 			options: cmp.Options{
 				cmpopts.IgnoreFields(output.GetUser{}, "User.CreatedAt", "User.UpdatedAt"),
 			},
+			prepare: func(mock sqlmock.Sqlmock) {
+				// SELECT期待値（GetByUID）- Bob ORMの実際のSQL形式に合わせる
+				selectQuery := `SELECT "users"\."ulid" AS "ulid", "users"\."display_name" AS "display_name", "users"\."deleted_at" AS "deleted_at", "users"\."created_at" AS "created_at", "users"\."updated_at" AS "updated_at", "users"\."uid" AS "uid" FROM "users" AS "users" WHERE \("users"\."uid" = \$1\)`
+				rows := sqlmock.NewRows([]string{"ulid", "display_name", "deleted_at", "created_at", "updated_at", "uid"}).
+					AddRow(TestUlid, TestDisplayName, nil, fixedTime, fixedTime, TestUID)
+				mock.ExpectQuery(selectQuery).
+					WithArgs(TestUID).
+					WillReturnRows(rows)
+			},
 		},
 		"UserNotFound": {
 			params: input.GetCurrentUserDetail{
@@ -162,34 +177,30 @@ func TestMockGetCurrentUser(t *testing.T) {
 			expected: nil,
 			wantErr:  errors.New("user not found"),
 			options:  cmp.Options{},
+			prepare: func(mock sqlmock.Sqlmock) {
+				// SELECT期待値（ユーザーが見つからない場合）
+				selectQuery := `SELECT "users"\."ulid" AS "ulid", "users"\."display_name" AS "display_name", "users"\."deleted_at" AS "deleted_at", "users"\."created_at" AS "created_at", "users"\."updated_at" AS "updated_at", "users"\."uid" AS "uid" FROM "users" AS "users" WHERE \("users"\."uid" = \$1\)`
+				mock.ExpectQuery(selectQuery).
+					WithArgs("not_exists_uid").
+					WillReturnError(errors.New("user not found"))
+			},
 		},
 	}
 
 	for k, v := range vectors {
 		t.Run(k, func(t *testing.T) {
-			// gomockコントローラー作成
-			ctrl := gomock.NewController(t)
-
-			// モックインターフェース作成
-			userQuery := query_mock.NewMockUser(ctrl)
-			userRepo := repository_mock.NewMockUser(ctrl) // 使用しないが、NewUserに必要
-
-			// モックの期待値設定
-			// input→query変換が正しく行われるかを検証
-			expectedQuery := query.UserGetQuery{
-				UID: null.StringFrom(v.params.UID),
+			// sqlmockセットアップ
+			db, mock, err := sqlmock.New()
+			if err != nil {
+				t.Fatalf("sqlmock error: %v", err)
 			}
-			
-			if v.wantErr != nil {
-				// エラーケース: GetByUIDでエラーを返す
-				userQuery.EXPECT().GetByUID(gomock.Any(), expectedQuery).Return(nil, v.wantErr)
-			} else {
-				// 正常ケース: GetByUIDでユーザーを返す
-				userQuery.EXPECT().GetByUID(gomock.Any(), expectedQuery).Return(v.expected.User, nil)
-			}
+			defer db.Close()
 
-			// usecaseを作成
-			userUsecase := NewUser(userQuery, userRepo)
+			// SQL期待値を設定
+			v.prepare(mock)
+
+			// Wire DIでユースケース生成
+			userUsecase := NewUserDI(db)
 
 			// テスト実行
 			actual, err := userUsecase.GetCurrentUser(context.Background(), v.params)
@@ -198,7 +209,7 @@ func TestMockGetCurrentUser(t *testing.T) {
 			if err != nil {
 				if v.wantErr == nil {
 					t.Fatalf("unexpected error: %v", err)
-				} else if !errors.Is(err, v.wantErr) {
+				} else if v.wantErr.Error() != err.Error() {
 					t.Fatalf("expected error: %v, got: %v", v.wantErr, err)
 				}
 			} else if v.wantErr != nil {
@@ -207,6 +218,11 @@ func TestMockGetCurrentUser(t *testing.T) {
 
 			if !cmp.Equal(actual, v.expected, v.options...) {
 				t.Errorf("unexpected result: %s", cmp.Diff(v.expected, actual, v.options...))
+			}
+
+			// sqlmockの期待値が全て満たされたかチェック
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("unfulfilled expectations: %s", err)
 			}
 		})
 	}
