@@ -41,3 +41,7 @@ golangci-lint:
   golangci-lint run --timeout=1h
 fmtcheck:
   @ $(foreach file,$(SRCS),gofmt -s -l $(file);)
+wire-gen-usecase:
+	wire gen ./core/usecase
+wire-gen-injector:
+	wire gen ./core/injector

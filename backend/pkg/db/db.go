@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/stephenafamo/scan"
 )
@@ -10,6 +11,13 @@ import (
 // Client :
 type Client struct {
 	dbClient *sql.DB
+}
+
+// NewDB initialize database
+func NewDB(sqlDB *sql.DB) *Client {
+	time.Local = time.FixedZone("JST", 9*60*60)
+	client := NewClient(sqlDB)
+	return &client
 }
 
 // NewClient :
