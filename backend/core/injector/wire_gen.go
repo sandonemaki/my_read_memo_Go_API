@@ -7,16 +7,21 @@
 package injector
 
 import (
-	"database/sql"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/infra/query"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/infra/repository"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase"
+	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/config"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/db"
+	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/logger"
+	"log/slog"
 )
 
 // Injectors from wire.go:
 
-func NewUserUseCase(sqlDB *sql.DB) usecase.User {
+func NewUserUseCase(configLogger config.Logger, postgres config.Postgres, string2 string) usecase.User {
+	handler := logger.NewLogger(configLogger)
+	slogLogger := slog.New(handler)
+	sqlDB := db.NewPSQL(postgres, slogLogger, string2)
 	client := db.NewDB(sqlDB)
 	user := query.NewUser(client)
 	repositoryUser := repository.NewUser(client)
