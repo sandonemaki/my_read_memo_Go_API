@@ -11,11 +11,8 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	_ "github.com/lib/pq"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/model"
-	queryImpl "github.com/sandonemaki/my_read_memo_Go_API/backend/core/infra/query"
-	repositoryImpl "github.com/sandonemaki/my_read_memo_Go_API/backend/core/infra/repository"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase/input"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase/output"
-	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/db"
 )
 
 // getTestDSN はテスト用のデータベース接続文字列を取得します（セキュリティ対応）
@@ -43,7 +40,7 @@ func TestCreateUser(t *testing.T) {
 	// データベース接続
 	sqlDB := setupTestDB(t)
 	defer sqlDB.Close()
-	
+
 	// テスト終了後のクリーンアップ
 	defer cleanupTestData(t, sqlDB)
 
@@ -56,7 +53,7 @@ func TestCreateUser(t *testing.T) {
 	}{
 		"OK": {
 			params: input.CreateUser{
-				Ulid:        "01HWEB0000000000000000001", // 新しい固定ULID（重複回避）
+				Ulid:        "01HWEB0000000000000000001",           // 新しい固定ULID（重複回避）
 				UID:         "integration_test_uid_fixed_ulid_001", // 新しい固定UID（重複回避）
 				DisplayName: "固定ULID統合テストユーザー001",
 			},
@@ -78,7 +75,7 @@ func TestCreateUser(t *testing.T) {
 				UID:         "", // 空文字列でバリデーションエラー
 				DisplayName: "テストユーザー",
 			},
-			expected: nil, // エラーケースなので期待値なし
+			expected: nil,                             // エラーケースなので期待値なし
 			wantErr:  fmt.Errorf("validation failed"), // バリデーションエラーを期待
 			options:  cmp.Options{},
 		},
@@ -86,13 +83,8 @@ func TestCreateUser(t *testing.T) {
 
 	for k, v := range vectors {
 		t.Run(k, func(t *testing.T) {
-			// 依存関係のセットアップ（元の実装を維持）
-			dbClient := db.NewClient(sqlDB) // use the *sql.DB instance, not tx
-			userQuery := queryImpl.NewUser(&dbClient)
-			userRepo := repositoryImpl.NewUser(&dbClient)
-
-			// ユースケースの作成
-			var userUsecase User = NewUser(userQuery, userRepo)
+			// wireを利用
+			var userUsecase User = NewUserDI(sqlDB)
 
 			// テスト実行
 			ctx := context.Background()
@@ -116,7 +108,7 @@ func TestCreateUser(t *testing.T) {
 					t.Errorf("unexpected result: %s", cmp.Diff(v.expected, result, v.options...))
 				}
 
-				t.Logf("✅ ユーザー作成成功！ ULID: %s, UID: %s, DisplayName: %s", 
+				t.Logf("✅ ユーザー作成成功！ ULID: %s, UID: %s, DisplayName: %s",
 					result.User.Ulid, result.User.UID, result.User.DisplayName)
 			}
 		})
@@ -135,10 +127,7 @@ func cleanupTestData(t *testing.T, sqlDB *sql.DB) {
 
 // setupTestUsers はテスト用のユーザーデータを事前作成します
 func setupTestUsers(t *testing.T, sqlDB *sql.DB) {
-	dbClient := db.NewClient(sqlDB)
-	userQuery := queryImpl.NewUser(&dbClient)
-	userRepo := repositoryImpl.NewUser(&dbClient)
-	userUsecase := NewUser(userQuery, userRepo)
+	userUsecase := NewUserDI(sqlDB)
 	ctx := context.Background()
 
 	// テスト用ユーザーを事前作成
@@ -148,7 +137,7 @@ func setupTestUsers(t *testing.T, sqlDB *sql.DB) {
 			DisplayName: "事前作成ユーザー001",
 		},
 		{
-			UID:         "pre_created_test_uid_002", 
+			UID:         "pre_created_test_uid_002",
 			DisplayName: "事前作成ユーザー002",
 		},
 	}
@@ -171,8 +160,8 @@ func TestUserUsecase_GetCurrentUser(t *testing.T) {
 
 	// vectors構造（Getのテストのみに集中）
 	vectors := map[string]struct {
-		params   input.GetCurrentUserDetail   // 取得時のパラメータ
-		expected *output.GetUser              // 期待する結果
+		params   input.GetCurrentUserDetail // 取得時のパラメータ
+		expected *output.GetUser            // 期待する結果
 		wantErr  error
 		options  cmp.Options
 	}{
@@ -212,13 +201,8 @@ func TestUserUsecase_GetCurrentUser(t *testing.T) {
 
 	for k, v := range vectors {
 		t.Run(k, func(t *testing.T) {
-			// 依存関係のセットアップ
-			dbClient := db.NewClient(sqlDB)
-			userQuery := queryImpl.NewUser(&dbClient)
-			userRepo := repositoryImpl.NewUser(&dbClient)
-			
-			// ユースケースの作成
-			var userUsecase User = NewUser(userQuery, userRepo)
+			// wireを利用
+			var userUsecase User = NewUserDI(sqlDB)
 			ctx := context.Background()
 
 			// GetCurrentUserのテスト実行（事前データありき）
@@ -242,10 +226,9 @@ func TestUserUsecase_GetCurrentUser(t *testing.T) {
 					t.Errorf("unexpected result: %s", cmp.Diff(v.expected, result, v.options...))
 				}
 
-				t.Logf("✅ ユーザー取得成功！ ULID: %s, UID: %s, DisplayName: %s", 
+				t.Logf("✅ ユーザー取得成功！ ULID: %s, UID: %s, DisplayName: %s",
 					result.User.Ulid, result.User.UID, result.User.DisplayName)
 			}
 		})
 	}
 }
-
