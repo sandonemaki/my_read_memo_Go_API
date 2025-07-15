@@ -20,14 +20,14 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeCoreHandler(configLogger config.Logger, postgres config.Postgres, string2 string) (*handler.Core, error) {
-	slogHandler := logger.NewLogger(configLogger)
+func InitializeCoreHandler(loggerConfig config.Logger, postgresConfig config.Postgres, applicationName string) (*handler.Core, error) {
+	slogHandler := logger.NewLogger(loggerConfig)
 	slogLogger := slog.New(slogHandler)
 	glue, err := firebase.NewFirebaseGlue()
 	if err != nil {
 		return nil, err
 	}
-	sqlDB := db.NewPSQL(postgres, slogLogger, string2)
+	sqlDB := db.NewPSQL(postgresConfig, slogLogger, applicationName)
 	client := db.NewDB(sqlDB)
 	user := query.NewUser(client)
 	repositoryUser := repository.NewUser(client)

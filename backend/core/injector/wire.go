@@ -16,7 +16,7 @@ import (
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/logger"
 )
 
-func InitializeCoreHandler(config.Logger, config.Postgres, string) (*handler.Core, error) {
+func InitializeCoreHandler(loggerConfig config.Logger, postgresConfig config.Postgres, applicationName string) (*handler.Core, error) {
 	wire.Build(
 		db.NewDB,
 		db.NewPSQL,
