@@ -7,8 +7,6 @@
 package injector
 
 import (
-	"log/slog"
-
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/handler"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/infra/query"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/infra/repository"
@@ -17,6 +15,7 @@ import (
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/db"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/firebase"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/logger"
+	"log/slog"
 )
 
 // Injectors from wire.go:
