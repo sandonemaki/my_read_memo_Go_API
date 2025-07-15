@@ -7,24 +7,31 @@
 package injector
 
 import (
+	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/handler"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/infra/query"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/infra/repository"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/config"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/db"
+	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/firebase"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/logger"
 	"log/slog"
 )
 
 // Injectors from wire.go:
 
-func NewUserUseCase(configLogger config.Logger, postgres config.Postgres, string2 string) usecase.User {
-	handler := logger.NewLogger(configLogger)
-	slogLogger := slog.New(handler)
+func InitializeCoreHandler(configLogger config.Logger, postgres config.Postgres, string2 string) (*handler.Core, error) {
+	slogHandler := logger.NewLogger(configLogger)
+	slogLogger := slog.New(slogHandler)
+	glue, err := firebase.NewFirebaseGlue()
+	if err != nil {
+		return nil, err
+	}
 	sqlDB := db.NewPSQL(postgres, slogLogger, string2)
 	client := db.NewDB(sqlDB)
 	user := query.NewUser(client)
 	repositoryUser := repository.NewUser(client)
 	usecaseUser := usecase.NewUser(user, repositoryUser)
-	return usecaseUser
+	core := handler.NewCore(slogLogger, glue, usecaseUser)
+	return core, nil
 }
