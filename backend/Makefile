@@ -18,29 +18,29 @@ define format
 endef
 
 format:
-  $(call format)
+	$(call format)
 
 # Goose コマンドのエイリアス
 GOOSE=goose -dir $(MIGRATION_DIR) $(GOOSE_DRIVER) "$(GOOSE_DBSTRING)"
 
 goose-status:
-  $(GOOSE) status
+	$(GOOSE) status
 goose-up:
-  $(GOOSE) up
+	$(GOOSE) up
 goose-down:
-  $(GOOSE) down
+	$(GOOSE) down
 goose-create:
-  @if [ -z "$(NAME)" ]; then \
-    echo "NAME is required"; \
-    exit 1; \
-  fi; \
-  $(GOOSE) create $(NAME) $(TYPE:=sql)
+	@if [ -z "$(NAME)" ]; then \
+		echo "NAME is required"; \
+		exit 1; \
+	fi; \
+	$(GOOSE) create $(NAME) $(TYPE:=sql)
 goose-reset:
-  $(GOOSE) reset
+	$(GOOSE) reset
 golangci-lint:
-  golangci-lint run --timeout=1h
+	golangci-lint run --timeout=1h
 fmtcheck:
-  @ $(foreach file,$(SRCS),gofmt -s -l $(file);)
+	@ $(foreach file,$(SRCS),gofmt -s -l $(file);)
 wire-gen-usecase:
 	wire gen ./core/usecase
 wire-gen-injector:
