@@ -59,6 +59,7 @@ schema-show:
 	done
 
 schema-dump:
+	@mkdir -p pkg
 	@echo "=== 最新スキーマ情報をpkg/schema.txtに出力中 ===" > pkg/schema.txt
 	@echo "Generated at: $$(date '+%Y-%m-%d %H:%M:%S')" >> pkg/schema.txt
 	@echo "Latest migration: $$(goose -dir migration postgres "$(GOOSE_DBSTRING)" status | tail -1 | awk '{print $$NF}')" >> pkg/schema.txt

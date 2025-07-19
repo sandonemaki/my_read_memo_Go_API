@@ -1,9 +1,12 @@
 #!/bin/bash
+set -euo pipefail
 
 # Goose + PostgreSQL用のschema.sql自動生成スクリプト
 # Rails schema.rbと同様の機能を提供
 
-DB_URL="postgres://yondeco:yondeco@localhost:5432/yondeco?sslmode=disable"
+DB_URL="${DB_URL:-postgres://yondeco:yondeco@localhost:5432/yondeco?sslmode=disable}"
+# Or: allow passing as first argument
+# DB_URL="${1:?usage: $0 <postgres_dsn>}"
 OUTPUT_FILE="schema.sql"
 
 # 現在の日時を取得
