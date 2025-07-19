@@ -1,0 +1,219 @@
+=== 最新スキーマ情報をpkg/schema.txtに出力中 ===
+Generated at: 2025-07-18 13:17:46
+Latest migration: 
+
+=== テーブル一覧 ===
+              List of relations
+ Schema |       Name        | Type  |  Owner  
+--------+-------------------+-------+---------
+ public | authors           | table | yondeco
+ public | goose_db_version  | table | yondeco
+ public | kindle_highlights | table | yondeco
+ public | master_books      | table | yondeco
+ public | ocr_texts         | table | yondeco
+ public | publishers        | table | yondeco
+ public | randoku_images    | table | yondeco
+ public | randoku_memos     | table | yondeco
+ public | reading_history   | table | yondeco
+ public | seidoku_memos     | table | yondeco
+ public | user_book_logs    | table | yondeco
+ public | users             | table | yondeco
+(12 rows)
+
+
+=== 全テーブル詳細 ===
+
+--- users ---
+                                   Table "public.users"
+    Column    |            Type             | Collation | Nullable |        Default        
+--------------+-----------------------------+-----------+----------+-----------------------
+ ulid         | text                        |           | not null | 
+ display_name | character varying(100)      |           | not null | ''::character varying
+ deleted_at   | timestamp without time zone |           |          | 
+ created_at   | timestamp without time zone |           | not null | statement_timestamp()
+ updated_at   | timestamp without time zone |           | not null | statement_timestamp()
+ uid          | character varying(255)      |           | not null | ''::character varying
+Indexes:
+    "users_pkey" PRIMARY KEY, btree (ulid)
+Referenced by:
+    TABLE "reading_history" CONSTRAINT "reading_history_user_ulid_fkey" FOREIGN KEY (user_ulid) REFERENCES users(ulid)
+    TABLE "user_book_logs" CONSTRAINT "user_book_logs_user_ulid_fkey" FOREIGN KEY (user_ulid) REFERENCES users(ulid)
+
+
+--- authors ---
+                                        Table "public.authors"
+   Column   |            Type             | Collation | Nullable |               Default               
+------------+-----------------------------+-----------+----------+-------------------------------------
+ id         | bigint                      |           | not null | nextval('authors_id_seq'::regclass)
+ name       | character varying(100)      |           | not null | ''::character varying
+ created_at | timestamp without time zone |           | not null | statement_timestamp()
+ updated_at | timestamp without time zone |           | not null | statement_timestamp()
+Indexes:
+    "authors_pkey" PRIMARY KEY, btree (id)
+Referenced by:
+    TABLE "master_books" CONSTRAINT "master_books_author_id_fkey" FOREIGN KEY (author_id) REFERENCES authors(id)
+
+
+--- publishers ---
+                                        Table "public.publishers"
+   Column   |            Type             | Collation | Nullable |                Default                 
+------------+-----------------------------+-----------+----------+----------------------------------------
+ id         | bigint                      |           | not null | nextval('publishers_id_seq'::regclass)
+ name       | character varying(100)      |           | not null | ''::character varying
+ created_at | timestamp without time zone |           | not null | statement_timestamp()
+ updated_at | timestamp without time zone |           | not null | statement_timestamp()
+Indexes:
+    "publishers_pkey" PRIMARY KEY, btree (id)
+Referenced by:
+    TABLE "master_books" CONSTRAINT "master_books_publisher_id_fkey" FOREIGN KEY (publisher_id) REFERENCES publishers(id)
+
+
+--- master_books ---
+                                         Table "public.master_books"
+    Column    |            Type             | Collation | Nullable |                 Default                  
+--------------+-----------------------------+-----------+----------+------------------------------------------
+ id           | bigint                      |           | not null | nextval('master_books_id_seq'::regclass)
+ isbn         | character varying(13)       |           | not null | ''::character varying
+ cover_s3_url | character varying(255)      |           | not null | ''::character varying
+ title        | character varying(60)       |           | not null | ''::character varying
+ author_id    | bigint                      |           | not null | 
+ publisher_id | bigint                      |           | not null | 
+ total_page   | integer                     |           | not null | 20
+ created_at   | timestamp without time zone |           | not null | statement_timestamp()
+ updated_at   | timestamp without time zone |           | not null | statement_timestamp()
+ published_at | date                        |           |          | 
+Indexes:
+    "master_books_pkey" PRIMARY KEY, btree (id)
+Foreign-key constraints:
+    "master_books_author_id_fkey" FOREIGN KEY (author_id) REFERENCES authors(id)
+    "master_books_publisher_id_fkey" FOREIGN KEY (publisher_id) REFERENCES publishers(id)
+Referenced by:
+    TABLE "kindle_highlights" CONSTRAINT "kindle_highlights_master_book_id_fkey" FOREIGN KEY (master_book_id) REFERENCES master_books(id)
+    TABLE "user_book_logs" CONSTRAINT "user_book_logs_master_book_id_fkey" FOREIGN KEY (master_book_id) REFERENCES master_books(id)
+
+
+--- randoku_images ---
+                                 Table "public.randoku_images"
+      Column       |            Type             | Collation | Nullable |        Default        
+-------------------+-----------------------------+-----------+----------+-----------------------
+ ulid              | text                        |           | not null | 
+ user_book_logs_id | bigint                      |           | not null | 0
+ is_bookmark       | boolean                     |           | not null | false
+ s3_url            | character varying(255)      |           | not null | ''::character varying
+ thumbnail_s3_url  | character varying(255)      |           | not null | ''::character varying
+ name              | character varying(255)      |           | not null | ''::character varying
+ is_already_read   | boolean                     |           | not null | false
+ created_at        | timestamp without time zone |           | not null | statement_timestamp()
+ updated_at        | timestamp without time zone |           | not null | statement_timestamp()
+Indexes:
+    "randoku_images_pkey" PRIMARY KEY, btree (ulid)
+Foreign-key constraints:
+    "randoku_images_user_book_logs_id_fkey" FOREIGN KEY (user_book_logs_id) REFERENCES user_book_logs(id)
+Referenced by:
+    TABLE "ocr_texts" CONSTRAINT "ocr_texts_randoku_img_ulid_fkey" FOREIGN KEY (randoku_img_ulid) REFERENCES randoku_images(ulid)
+
+
+--- randoku_memos ---
+                                            Table "public.randoku_memos"
+      Column       |            Type             | Collation | Nullable |                  Default                  
+-------------------+-----------------------------+-----------+----------+-------------------------------------------
+ id                | bigint                      |           | not null | nextval('randoku_memos_id_seq'::regclass)
+ user_book_logs_id | bigint                      |           | not null | 
+ content           | text                        |           | not null | ''::text
+ content_tag       | integer                     |           | not null | 0
+ created_at        | timestamp without time zone |           | not null | statement_timestamp()
+ updated_at        | timestamp without time zone |           | not null | statement_timestamp()
+Indexes:
+    "randoku_memos_pkey" PRIMARY KEY, btree (id)
+Foreign-key constraints:
+    "randoku_memos_user_book_logs_id_fkey" FOREIGN KEY (user_book_logs_id) REFERENCES user_book_logs(id)
+
+
+--- user_book_logs ---
+                                          Table "public.user_book_logs"
+     Column     |            Type             | Collation | Nullable |                  Default                   
+----------------+-----------------------------+-----------+----------+--------------------------------------------
+ id             | bigint                      |           | not null | nextval('user_book_logs_id_seq'::regclass)
+ user_ulid      | text                        |           | not null | 
+ master_book_id | bigint                      |           | not null | 
+ status         | reading_type                |           | not null | 'smooth_randoku'::reading_type
+ is_seidoku_key | boolean                     |           | not null | false
+ registered_at  | date                        |           | not null | 
+ created_at     | timestamp without time zone |           | not null | statement_timestamp()
+Indexes:
+    "user_book_logs_pkey" PRIMARY KEY, btree (id)
+    "user_book_logs_user_ulid_master_book_id_key" UNIQUE CONSTRAINT, btree (user_ulid, master_book_id)
+Foreign-key constraints:
+    "user_book_logs_master_book_id_fkey" FOREIGN KEY (master_book_id) REFERENCES master_books(id)
+    "user_book_logs_user_ulid_fkey" FOREIGN KEY (user_ulid) REFERENCES users(ulid)
+Referenced by:
+    TABLE "randoku_images" CONSTRAINT "randoku_images_user_book_logs_id_fkey" FOREIGN KEY (user_book_logs_id) REFERENCES user_book_logs(id)
+    TABLE "randoku_memos" CONSTRAINT "randoku_memos_user_book_logs_id_fkey" FOREIGN KEY (user_book_logs_id) REFERENCES user_book_logs(id)
+    TABLE "seidoku_memos" CONSTRAINT "seidoku_memos_user_book_logs_id_fkey" FOREIGN KEY (user_book_logs_id) REFERENCES user_book_logs(id)
+
+
+--- seidoku_memos ---
+                                            Table "public.seidoku_memos"
+      Column       |            Type             | Collation | Nullable |                  Default                  
+-------------------+-----------------------------+-----------+----------+-------------------------------------------
+ id                | bigint                      |           | not null | nextval('seidoku_memos_id_seq'::regclass)
+ user_book_logs_id | bigint                      |           | not null | 
+ content           | text                        |           | not null | ''::text
+ content_tag       | integer                     |           | not null | 0
+ created_at        | timestamp without time zone |           | not null | statement_timestamp()
+ updated_at        | timestamp without time zone |           | not null | statement_timestamp()
+Indexes:
+    "seidoku_memos_pkey" PRIMARY KEY, btree (id)
+Foreign-key constraints:
+    "seidoku_memos_user_book_logs_id_fkey" FOREIGN KEY (user_book_logs_id) REFERENCES user_book_logs(id)
+
+
+--- reading_history ---
+                                         Table "public.reading_history"
+   Column    |            Type             | Collation | Nullable |                   Default                   
+-------------+-----------------------------+-----------+----------+---------------------------------------------
+ id          | bigint                      |           | not null | nextval('reading_history_id_seq'::regclass)
+ user_ulid   | text                        |           | not null | 
+ content_url | character varying(255)      |           | not null | ''::character varying
+ recorded_at | timestamp without time zone |           | not null | statement_timestamp()
+ created_at  | timestamp without time zone |           | not null | statement_timestamp()
+Indexes:
+    "reading_history_pkey" PRIMARY KEY, btree (id)
+Foreign-key constraints:
+    "reading_history_user_ulid_fkey" FOREIGN KEY (user_ulid) REFERENCES users(ulid)
+
+
+--- ocr_texts ---
+                                           Table "public.ocr_texts"
+      Column      |            Type             | Collation | Nullable |                Default                
+------------------+-----------------------------+-----------+----------+---------------------------------------
+ id               | bigint                      |           | not null | nextval('ocr_texts_id_seq'::regclass)
+ randoku_img_ulid | text                        |           | not null | 
+ text             | character varying(255)      |           | not null | ''::character varying
+ created_at       | timestamp without time zone |           | not null | statement_timestamp()
+ updated_at       | timestamp without time zone |           | not null | statement_timestamp()
+Indexes:
+    "ocr_texts_pkey" PRIMARY KEY, btree (id)
+    "ocr_texts_randoku_img_ulid_key" UNIQUE CONSTRAINT, btree (randoku_img_ulid)
+Foreign-key constraints:
+    "ocr_texts_randoku_img_ulid_fkey" FOREIGN KEY (randoku_img_ulid) REFERENCES randoku_images(ulid)
+
+
+--- kindle_highlights ---
+                                          Table "public.kindle_highlights"
+     Column     |            Type             | Collation | Nullable |                    Default                    
+----------------+-----------------------------+-----------+----------+-----------------------------------------------
+ id             | bigint                      |           | not null | nextval('kindle_highlights_id_seq'::regclass)
+ master_book_id | bigint                      |           | not null | 
+ position       | integer                     |           | not null | 0
+ highlight      | text                        |           | not null | ''::text
+ memo           | text                        |           | not null | ''::text
+ last_synced_at | date                        |           | not null | 
+ created_at     | timestamp without time zone |           | not null | statement_timestamp()
+ updated_at     | timestamp without time zone |           | not null | statement_timestamp()
+Indexes:
+    "kindle_highlights_pkey" PRIMARY KEY, btree (id)
+    "kindle_highlights_master_book_id_position_key" UNIQUE CONSTRAINT, btree (master_book_id, "position")
+Foreign-key constraints:
+    "kindle_highlights_master_book_id_fkey" FOREIGN KEY (master_book_id) REFERENCES master_books(id)
+
