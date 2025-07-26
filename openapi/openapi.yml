@@ -26,6 +26,24 @@ paths:
         '500':
           description: サーバー内部エラー
 
+    put:
+      tags:
+        - users
+      summary: 現在のユーザー情報を更新
+      description: 認証されたユーザーの情報を更新します
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: ユーザー情報更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateUserResponse'
 
 components:
   schemas:
@@ -47,6 +65,43 @@ components:
               type: string
               description: ユーザー表示名
               example: "山田太郎"
+            created_at:
+              type: string
+              format: date-time
+              description: アカウント作成日時
+              example: "2024-01-01T00:00:00Z"
+            updated_at:
+              type: string
+              format: date-time
+              description: 最終更新日時
+              example: "2024-01-01T00:00:00Z"
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        display_name:
+          type: string
+          description: ユーザー表示名
+          example: "山田次郎"
+
+    UpdateUserResponse:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            ulid:
+              type: string
+              description: ユーザーの一意識別子（ULID形式）
+              example: "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+            uid:
+              type: string
+              description: Firebase認証UID
+              example: "firebase_uid_123456789"
+            display_name:
+              type: string
+              description: ユーザー表示名
+              example: "山田次郎"
             created_at:
               type: string
               format: date-time
