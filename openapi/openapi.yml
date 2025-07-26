@@ -37,7 +37,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserRequest'
+              $ref: '#/components/schemas/UpdateUser'
       responses:
         '200':
           description: ユーザー情報更新成功
@@ -99,7 +99,7 @@ components:
           $ref: '#/components/schemas/User'
       required:
         - user
-    UserRequest:
+    UpdateUser:
       type: object
       properties:
         display_name:
