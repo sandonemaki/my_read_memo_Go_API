@@ -81,14 +81,19 @@ components:
           type: string
           description: ユーザーの一意識別子（ULID形式）
           example: "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+          minLength: 26
+          maxLength: 26
         uid:
           type: string
           description: Firebase認証UID
           example: "firebase_uid_123456789"
+          minLength: 1
         display_name:
           type: string
           description: ユーザー表示名
           example: "山田太郎"
+          minLength: 1
+          maxLength: 100
         created_at:
           type: string
           format: date-time
@@ -113,6 +118,8 @@ components:
           type: string
           description: ユーザー表示名
           example: "山田次郎"
+          minLength: 1
+          maxLength: 100
       required:
         - display_name
 
