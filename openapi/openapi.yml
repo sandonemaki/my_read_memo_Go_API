@@ -54,6 +54,22 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+    delete:
+      tags:
+        - users
+      summary: 現在のユーザーアカウントを削除
+      description: 認証されたユーザーのアカウントを削除します（論理削除）
+      operationId: DeleteMe
+      responses:
+        '204':
+          description: ユーザー削除成功
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
 components:
   securitySchemes:
     BearerAuth:
