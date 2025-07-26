@@ -55,6 +55,16 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Firebase認証IDトークン
+        
+        ヘッダー形式: `Authorization: Bearer <firebase_id_token>`
+
   responses:
     BadRequest:
       description: リクエストが無効です
