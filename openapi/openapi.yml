@@ -71,6 +71,8 @@ components:
       properties:
         user:
           $ref: '#/components/schemas/User'
+      required:
+        - user
 
     User:
       type: object
@@ -97,6 +99,12 @@ components:
           format: date-time
           description: 最終更新日時
           example: "2024-01-01T00:00:00Z"
+      required:
+        - ulid
+        - uid
+        - display_name
+        - created_at
+        - updated_at
 
     UpdateUserRequest:
       type: object
@@ -105,5 +113,7 @@ components:
           type: string
           description: ユーザー表示名
           example: "山田次郎"
+      required:
+        - display_name
 
 
