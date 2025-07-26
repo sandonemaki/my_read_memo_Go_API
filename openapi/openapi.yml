@@ -22,15 +22,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserResponse'
         '401':
-          description: 認証が必要です
+          $ref: '#/components/responses/Unauthorized'
         '500':
-          description: サーバー内部エラー
+          $ref: '#/components/responses/InternalServerError'
 
     put:
       tags:
         - users
       summary: 現在のユーザー情報を更新
       description: 認証されたユーザーの情報を更新します
+      operationId: UpdateMe
       requestBody:
         required: true
         content:
@@ -44,8 +45,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
 components:
+  responses:
+    BadRequest:
+      description: リクエストが無効です
+    Unauthorized:
+      description: 認証が必要です
+    NotFound:
+      description: リソースが見つかりません
+    InternalServerError:
+      description: サーバー内部エラー
+
   schemas:
     UserResponse:
       type: object
