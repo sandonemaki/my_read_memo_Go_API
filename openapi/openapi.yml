@@ -94,6 +94,12 @@ components:
           example: "山田太郎"
           minLength: 1
           maxLength: 100
+        deleted_at:
+          type: string
+          format: date-time
+          description: アカウント削除日時（論理削除）
+          example: "2024-01-01T00:00:00Z"
+          nullable: true
         created_at:
           type: string
           format: date-time
