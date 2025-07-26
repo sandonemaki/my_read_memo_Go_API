@@ -1,0 +1,60 @@
+openapi: '3.0.3'
+info:
+  title: Yondeco
+  version: '1.0.0-oas3.0.3'
+security:
+  - BearerAuth: []
+servers:
+  - url: https:/.sample.com
+paths:
+  /users/me:
+    get:
+      tags:
+        - users
+      summary: 現在のユーザー情報を取得
+      description: 認証されたユーザーの詳細情報を取得します
+      operationId: GetMe
+      responses:
+        '200':
+          description: ユーザー情報取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserResponse'
+        '401':
+          description: 認証が必要です
+        '500':
+          description: サーバー内部エラー
+
+
+components:
+  schemas:
+    GetUserResponse:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            ulid:
+              type: string
+              description: ユーザーの一意識別子（ULID形式）
+              example: "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+            uid:
+              type: string
+              description: Firebase認証UID
+              example: "firebase_uid_123456789"
+            display_name:
+              type: string
+              description: ユーザー表示名
+              example: "山田太郎"
+            created_at:
+              type: string
+              format: date-time
+              description: アカウント作成日時
+              example: "2024-01-01T00:00:00Z"
+            updated_at:
+              type: string
+              format: date-time
+              description: 最終更新日時
+              example: "2024-01-01T00:00:00Z"
+
