@@ -37,7 +37,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateUserRequest'
+              $ref: '#/components/schemas/UserRequest'
       responses:
         '200':
           description: ユーザー情報更新成功
@@ -99,6 +99,17 @@ components:
           $ref: '#/components/schemas/User'
       required:
         - user
+    UserRequest:
+      type: object
+      properties:
+        display_name:
+          type: string
+          description: ユーザー表示名
+          example: "山田次郎"
+          minLength: 1
+          maxLength: 100
+      required:
+        - display_name
 
     User:
       type: object
@@ -143,16 +154,6 @@ components:
         - created_at
         - updated_at
 
-    UpdateUserRequest:
-      type: object
-      properties:
-        display_name:
-          type: string
-          description: ユーザー表示名
-          example: "山田次郎"
-          minLength: 1
-          maxLength: 100
-      required:
-        - display_name
+    
 
 
