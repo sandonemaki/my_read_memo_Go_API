@@ -5,7 +5,7 @@ info:
 security:
   - BearerAuth: []
 servers:
-  - url: https:/.sample.com
+  - url: https://sample.com
 paths:
   /users/me:
     get:
@@ -84,14 +84,29 @@ components:
   responses:
     BadRequest:
       description: リクエストが無効です
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
     Unauthorized:
       description: 認証が必要です
     NotFound:
       description: リソースが見つかりません
     InternalServerError:
       description: サーバー内部エラー
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
 
   schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
     UserResponse:
       type: object
       properties:
