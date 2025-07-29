@@ -4,10 +4,13 @@ go 1.24.4
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
+	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/DATA-DOG/go-txdb v0.2.1
+	github.com/go-chi/chi/v5 v5.2.2
 	github.com/go-playground/validator/v10 v10.27.0
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.7.0
+	github.com/google/wire v0.6.0
 	github.com/jaswdr/faker/v2 v2.5.0
 	github.com/lib/pq v1.10.9
 	github.com/oklog/ulid/v2 v2.1.1
@@ -29,7 +32,6 @@ require (
 	cloud.google.com/go/longrunning v0.6.7 // indirect
 	cloud.google.com/go/monitoring v1.24.2 // indirect
 	cloud.google.com/go/storage v1.53.0 // indirect
-	github.com/DATA-DOG/go-sqlmock v1.5.2 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.27.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.51.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.51.0 // indirect
@@ -53,7 +55,6 @@ require (
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/google/wire v0.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.6 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.1 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect

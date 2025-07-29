@@ -1,0 +1,12 @@
+# oapi-codegen設定ファイル
+# 段階的実装：通常サーバーモードから開始
+
+package: oapi
+generate:
+  models: true           # 型定義生成（UserResponse, UpdateUser等）
+  chi-server: true
+  strict-server: false
+  embedded-spec: false   # OpenAPI仕様をコードに埋め込まない
+output: pkg/oapi/oapi_gen.go
+output-options:
+  skip-prune: true       # 未使用コードの削除をスキップ
