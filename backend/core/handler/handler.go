@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -46,4 +47,21 @@ func (c *Core) GetAuthMiddleware(ctx context.Context, logger *slog.Logger) func(
 
 		})
 	}
+}
+
+// トランザクション処理のラッパー関数（前処理・後処理を提供）
+func WithTx(ctx context.Context, logger *slog.Logger, txfunc func(ctx context.Context) error) (err error) {
+	defer func() {
+		// panicが発生した場合のリカバリ
+		if r := recover(); r != nil {
+			// panicをerrorに変換
+			err = r.(error)
+		}
+		// エラーがあればログの出力
+		if err != nil {
+			logger.ErrorContext(ctx, fmt.Sprintf("error: %+v", err))
+		}
+	}()
+	// 渡されたトランザクション処理を実行
+	return txfunc(ctx)
 }
