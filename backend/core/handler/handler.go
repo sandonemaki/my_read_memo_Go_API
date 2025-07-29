@@ -41,8 +41,13 @@ func (c *Core) GetAuthMiddleware(ctx context.Context, logger *slog.Logger) func(
 			var buf bytes.Buffer
 			tee := io.TeeReader(r.Body, &buf)
 			r.Body = io.NopCloser(&buf) // r.Bodyを復元
+
 			body, _ := io.ReadAll(tee)
-			logger.InfoContext(r.Context(), "dump request", "method", r.Method, "url", r.URL.String(), "header", r.Header, "body", string(body))
+			logger.InfoContext(r.Context(), "dump request",
+				"method", r.Method,
+				"url", r.URL.String(),
+				"header", r.Header,
+				"body", string(body))
 			next.ServeHTTP(w, r.WithContext(ctx))
 
 		})
@@ -55,7 +60,11 @@ func WithTx(ctx context.Context, logger *slog.Logger, txfunc func(ctx context.Co
 		// panicが発生した場合のリカバリ
 		if r := recover(); r != nil {
 			// panicをerrorに変換
-			err = r.(error)
+			if e, ok := r.(error); ok {
+				err = e
+			} else {
+				err = fmt.Errorf("panic recovered: %v", r)
+			}
 		}
 		// エラーがあればログの出力
 		if err != nil {
