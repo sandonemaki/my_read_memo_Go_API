@@ -18,21 +18,21 @@ import (
 var _ oapi.StrictServerInterface = (*Core)(nil)
 
 type Core struct {
-	Logger        *slog.Logger // 大文字に変更して外部アクセス可能
-	firebase      firebase.Glue
-	userUsecase   usecase.User
-	Unimplemented // 手動で作成したUnimplementedを埋め込み
+	Logger           *slog.Logger // 大文字に変更して外部アクセス可能
+	firebaseAuthGlue firebase.FirebaseAuthGlue
+	userUsecase      usecase.User
+	Unimplemented    // 手動で作成したUnimplementedを埋め込み
 }
 
 func NewCore(
 	logger *slog.Logger,
-	firebase firebase.Glue,
+	firebaseAuthGlue firebase.FirebaseAuthGlue,
 	userUsecase usecase.User,
 ) *Core {
 	return &Core{
-		Logger:      logger, // フィールド名も大文字に変更
-		firebase:    firebase,
-		userUsecase: userUsecase,
+		Logger:           logger, // フィールド名も大文字に変更
+		firebaseAuthGlue: firebaseAuthGlue,
+		userUsecase:      userUsecase,
 	}
 }
 

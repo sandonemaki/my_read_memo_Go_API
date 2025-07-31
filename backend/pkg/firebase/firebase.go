@@ -25,21 +25,21 @@ type Credential struct {
 	DisplayName   null.String
 }
 
-// FirebaseGlue
-type Glue interface {
-	GetCredFromJWT(ctx context.Context, idToken string) (cred *Credential, err error)
-	DeleteUser(ctx context.Context, uid string) error
+// FirebaseAuthGlue - Firebase認証の接着剤インターフェース
+type FirebaseAuthGlue interface {
+	CheckLoginJWT(ctx context.Context, idToken string) (cred *Credential, err error) // 変更前: GetCredFromJWT
+	DeleteAccount(ctx context.Context, uid string) error                             // 変更前: DeleteUser
 }
 
 // Goでは新しく生成されたAppのClientを *auth.Client として扱う
-type firebaseGlue struct {
+type firebaseAuthGlue struct {
 	client *auth.Client
 }
 
-// NewFirebaseGlue :
+// NewfirebaseAuthGlue :
 // https://firebase.google.com/docs/auth/admin/verify-id-tokens?hl=ja#verify_id_tokens_using_the_firebase_admin_sdk
 // 戻り値は interface メソッドの実装
-func NewFirebaseGlue() (Glue, error) {
+func NewfirebaseAuthGlue() (FirebaseAuthGlue, error) {
 	// Firebase Admin Appを初期化
 	app, err := firebase.NewApp(context.Background(), nil)
 	if err != nil {
@@ -50,13 +50,13 @@ func NewFirebaseGlue() (Glue, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get Firebase auth client: %w", err)
 	}
-	return &firebaseGlue{firebaseAuth}, nil
+	return &firebaseAuthGlue{firebaseAuth}, nil
 }
 
-// tokenの検証
+// CheckLoginJWT - JWTトークンでログイン状態をチェックする
 // 検証後にFirebaseのJWTトークンから必要な情報を抽出し、アプリケーション用のCredential構造体に変換
 // NOTE: https://firebase.google.com/docs/auth/admin/verify-id-tokens?hl=ja#verify_id_tokens_using_the_firebase_admin_sdk
-func (f firebaseGlue) GetCredFromJWT(ctx context.Context, idToken string) (cred *Credential, err error) {
+func (f firebaseAuthGlue) CheckLoginJWT(ctx context.Context, idToken string) (cred *Credential, err error) {
 
 	token, err := f.client.VerifyIDToken(ctx, idToken)
 	if err != nil {
@@ -105,7 +105,8 @@ func (f firebaseGlue) GetCredFromJWT(ctx context.Context, idToken string) (cred 
 	return cred, nil
 }
 
-func (f firebaseGlue) DeleteUser(ctx context.Context, uid string) error {
+// DeleteAccount - Firebase Authentication からアカウントを削除する
+func (f firebaseAuthGlue) DeleteAccount(ctx context.Context, uid string) error {
 	if _, err := f.client.GetUser(ctx, uid); err != nil {
 		if auth.IsUserNotFound(err) {
 			return nil

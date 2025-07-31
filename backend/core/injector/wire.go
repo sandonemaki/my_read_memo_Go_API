@@ -22,7 +22,7 @@ func InitializeCoreHandler(loggerConfig config.Logger, postgresConfig config.Pos
 		db.NewPSQL,
 		logger.NewLogger,
 		slog.New,
-		firebase.NewFirebaseGlue,
+		firebase.NewfirebaseAuthGlue,
 		query.NewUser,
 		repository.NewUser,
 		usecase.NewUser,
