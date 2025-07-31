@@ -10,12 +10,18 @@ import (
 
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/firebase"
+	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/oapi"
 )
 
+// コンパイル時に Core 構造体が StrictServerInterface を完全に実装しているかチェック
+// Core構造体のポインタ型にnilをキャスト
+var _ oapi.StrictServerInterface = (*Core)(nil)
+
 type Core struct {
-	logger      *slog.Logger
-	firebase    firebase.Glue
-	userUsecase usecase.User
+	Logger        *slog.Logger // 大文字に変更して外部アクセス可能
+	firebase      firebase.Glue
+	userUsecase   usecase.User
+	Unimplemented // 手動で作成したUnimplementedを埋め込み
 }
 
 func NewCore(
@@ -24,7 +30,7 @@ func NewCore(
 	userUsecase usecase.User,
 ) *Core {
 	return &Core{
-		logger:      logger,
+		Logger:      logger, // フィールド名も大文字に変更
 		firebase:    firebase,
 		userUsecase: userUsecase,
 	}

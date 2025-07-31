@@ -5,7 +5,7 @@ package: oapi
 generate:
   models: true           # 型定義生成（UserResponse, UpdateUser等）
   chi-server: true
-  strict-server: false
+  strict-server: true
   embedded-spec: false   # OpenAPI仕様をコードに埋め込まない
 output: pkg/oapi/oapi_gen.go
 output-options:
