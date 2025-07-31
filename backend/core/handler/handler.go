@@ -9,7 +9,7 @@ import (
 	"net/http"
 
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase"
-	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/firebase"
+	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/auth/infra/firebase"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/oapi"
 )
 
