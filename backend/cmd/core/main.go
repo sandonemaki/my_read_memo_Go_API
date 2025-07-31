@@ -1,20 +1,56 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
+	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
+	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/injector"
+	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/config"
+	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/oapi"
 )
 
 func main() {
-	fmt.Printf("Hello, World!\n")
-	http.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, World!")
-	})
+	c := config.Prepare()
 
-	// サーバー起動
-	log.Println("サーバーを起動します。ポート：8080")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Fatalf("サーバー起動に失敗しました: %v", err)
+	r := chi.NewRouter()
+	// wire呼び出し: 必要な部品（ログ、DB）を自動で組み立て
+	core, _ := injector.InitializeCoreHandler(c.Logger, c.Postgres, "core")
+
+	// Wireで作成されたloggerを使用（重複解消）
+	core.Logger.Info("starting server", "port", c.HTTP.Port)
+
+	// CORS設定
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins: c.HTTP.Cors,
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders: []string{"Content-Type", "Authorization"},
+		Debug:          true,
+	}))
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	//  認証チェック
+	r.Use(core.GetAuthMiddleware(ctx, core.Logger))
+
+	// OpenAPI仕様ファイルに基づいて、自動的にルート（URL pattern）を登録
+	strictHandler := oapi.NewStrictHandler(core, nil)
+	oapi.HandlerFromMux(strictHandler, r)
+
+	server := http.Server{
+		Handler: r,
+		Addr:    fmt.Sprintf(":%d", c.HTTP.Port),
 	}
+
+	go func() {
+		if err := server.ListenAndServe(); err != http.ErrServerClosed {
+			core.Logger.Error("server closed", slog.Any("err", err))
+			os.Exit(1)
+		}
+	}()
 }
