@@ -8,11 +8,11 @@ dev:
   logger:
     debug: false
   postgres:
-    dbname: :"yondeco"
+    dbname: "yondeco"
     host: "localhost"
-    port: 5432
-    user: :"yondeco"
-    password: :"yondeco"
+    port: "5432"
+    user: "yondeco"
+    pass: "yondeco"
     sslmode: "disable"
 
 test:
@@ -22,9 +22,9 @@ test:
   logger:
     debug: false
   postgres:
-    dbname: :"yondeco_test"
+    dbname: "testdb"
     host: "localhost"
-    port: 5432
-    user: "yondeco_test"
-    password: "yondeco_test"
+    port: "5433"
+    user: "yondeco"
+    pass: "yondeco"
     sslmode: "disable"
