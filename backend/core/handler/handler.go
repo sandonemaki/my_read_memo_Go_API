@@ -9,6 +9,8 @@ import (
 	"net/http"
 
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase"
+	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase/input"
+	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/auth/domain/model"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/auth/infra/firebase"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/oapi"
 )
@@ -79,4 +81,29 @@ func WithTx(ctx context.Context, logger *slog.Logger, txfunc func(ctx context.Co
 	}()
 	// 渡されたトランザクション処理を実行
 	return txfunc(ctx)
+}
+
+// NOTE: 新規ユーザーの場合2回のAPI呼び出し（以下）を1回にするため
+func (c *Core) LoginOrSignup(ctx context.Context, idToken string) (*model.Credential, error) {
+	// 1. Firebase認証
+	credential, err := c.firebaseAuthGlue.CheckLoginJWT(ctx, idToken)
+	if err != nil {
+		return nil, err
+	}
+
+	// 2. 事前チェック: ユーザー存在確認（効率的）
+	_, err = c.userUsecase.GetCurrentUser(ctx, input.GetCurrentUserDetail{
+		UID: credential.UID,
+	})
+
+	if err != nil {
+		// 3. 存在しない場合のみ作成（必要な時だけ）
+		userInput := input.NewCreateUser(credential.UID, credential.GetSafeDisplayName())
+		_, err = c.userUsecase.Create(ctx, userInput)
+		if err != nil {
+			return nil, err
+		}
+	}
+	// 4. 既存ユーザーの場合は何もしない
+	return credential, nil
 }
