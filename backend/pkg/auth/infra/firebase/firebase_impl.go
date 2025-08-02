@@ -6,40 +6,19 @@ import (
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
+	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/auth/domain/model"
 	"github.com/volatiletech/null"
 )
 
-// NOTE: アーキテクチャパターン
-// https://zenn.dev/cloud_ace/articles/firebase-auth-guide
-
-// NOTE: 認証の流れ
-// https://firebase.google.com/docs/admin/setup?hl=ja
-
-// Credential
-type Credential struct {
-	UID           string
-	Email         string
-	EmailVerified bool
-	Disabled      bool
-	PictureURL    null.String
-	DisplayName   null.String
-}
-
-// FirebaseGlue
-type Glue interface {
-	GetCredFromJWT(ctx context.Context, idToken string) (cred *Credential, err error)
-	DeleteUser(ctx context.Context, uid string) error
-}
-
-// Goでは新しく生成されたAppのClientを *auth.Client として扱う
-type firebaseGlue struct {
+// firebaseAuthGlue
+type firebaseAuthGlue struct {
 	client *auth.Client
 }
 
-// NewFirebaseGlue :
+// NewFirebaseAuthGlue :
 // https://firebase.google.com/docs/auth/admin/verify-id-tokens?hl=ja#verify_id_tokens_using_the_firebase_admin_sdk
-// 戻り値は interface メソッドの実装
-func NewFirebaseGlue() (Glue, error) {
+// 戻り値は interface メソッドの実装
+func NewFirebaseAuthGlue() (FirebaseAuthGlue, error) {
 	// Firebase Admin Appを初期化
 	app, err := firebase.NewApp(context.Background(), nil)
 	if err != nil {
@@ -50,13 +29,13 @@ func NewFirebaseGlue() (Glue, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get Firebase auth client: %w", err)
 	}
-	return &firebaseGlue{firebaseAuth}, nil
+	return &firebaseAuthGlue{firebaseAuth}, nil
 }
 
-// tokenの検証
+// CheckLoginJWT - JWTトークンでログイン状態をチェックする
 // 検証後にFirebaseのJWTトークンから必要な情報を抽出し、アプリケーション用のCredential構造体に変換
 // NOTE: https://firebase.google.com/docs/auth/admin/verify-id-tokens?hl=ja#verify_id_tokens_using_the_firebase_admin_sdk
-func (f firebaseGlue) GetCredFromJWT(ctx context.Context, idToken string) (cred *Credential, err error) {
+func (f firebaseAuthGlue) CheckLoginJWT(ctx context.Context, idToken string) (cred *model.Credential, err error) {
 
 	token, err := f.client.VerifyIDToken(ctx, idToken)
 	if err != nil {
@@ -94,7 +73,7 @@ func (f firebaseGlue) GetCredFromJWT(ctx context.Context, idToken string) (cred 
 		name = null.StringFrom(email)
 	}
 
-	cred = &Credential{
+	cred = &model.Credential{
 		UID:           token.UID,
 		Email:         email,
 		EmailVerified: emailVerified,
@@ -105,7 +84,8 @@ func (f firebaseGlue) GetCredFromJWT(ctx context.Context, idToken string) (cred 
 	return cred, nil
 }
 
-func (f firebaseGlue) DeleteUser(ctx context.Context, uid string) error {
+// DeleteAccount - Firebase Authentication からアカウントを削除する
+func (f firebaseAuthGlue) DeleteAccount(ctx context.Context, uid string) error {
 	if _, err := f.client.GetUser(ctx, uid); err != nil {
 		if auth.IsUserNotFound(err) {
 			return nil

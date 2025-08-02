@@ -20,7 +20,11 @@ func main() {
 
 	r := chi.NewRouter()
 	// wire呼び出し: 必要な部品（ログ、DB）を自動で組み立て
-	core, _ := injector.InitializeCoreHandler(c.Logger, c.Postgres, "core")
+	core, err := injector.InitializeCoreHandler(c.Logger, c.Postgres, "core")
+	if err != nil {
+		slog.Error("failed to initialize core handler", slog.Any("err", err))
+		os.Exit(1)
+	}
 
 	// Wireで作成されたloggerを使用（重複解消）
 	core.Logger.Info("starting server", "port", c.HTTP.Port)
