@@ -10,9 +10,9 @@ import (
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/infra/query"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/infra/repository"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase"
+	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/auth/infra/firebase"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/config"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/db"
-	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/firebase"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/logger"
 )
 
@@ -22,7 +22,7 @@ func InitializeCoreHandler(loggerConfig config.Logger, postgresConfig config.Pos
 		db.NewPSQL,
 		logger.NewLogger,
 		slog.New,
-		firebase.NewfirebaseAuthGlue,
+		firebase.NewFirebaseAuthGlue,
 		query.NewUser,
 		repository.NewUser,
 		usecase.NewUser,
