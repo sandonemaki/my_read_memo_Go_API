@@ -47,8 +47,12 @@ func main() {
 	oapi.HandlerFromMux(strictHandler, r)
 
 	server := http.Server{
-		Handler: r,
-		Addr:    fmt.Sprintf(":%d", c.HTTP.Port),
+		Handler:           r,
+		Addr:              fmt.Sprintf(":%d", c.HTTP.Port),
+		ReadHeaderTimeout: 20 * time.Second,
+		ReadTimeout:       1 * time.Second,
+		WriteTimeout:      2 * time.Second,
+		IdleTimeout:       2 * time.Second,
 	}
 
 	go func() {
