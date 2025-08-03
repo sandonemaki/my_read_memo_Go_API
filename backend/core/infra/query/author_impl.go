@@ -28,10 +28,10 @@ func (r *author) GetByID(ctx context.Context, query query.AuthorGetQuery, orFail
 	if query.ID.Valid {
 		mods = append(mods, dbmodels.SelectWhere.Authors.ID.EQ(query.ID.Int64))
 	}
-	
+
 	// Bob ORMでクエリを構築して実行
 	dbAuthor, err := dbmodels.Authors.Query(mods...).One(ctx, r.dbClient)
-	
+
 	// エラーハンドリング
 	if err != nil {
 		// データが見つからない場合のエラーかチェック
@@ -47,13 +47,33 @@ func (r *author) GetByID(ctx context.Context, query query.AuthorGetQuery, orFail
 		// その他のDBエラー（接続エラー等）はそのまま返す
 		return nil, err
 	}
-	
+
 	// 型変換: dbmodels.Author → model.Author
 	return (*model.Author)(dbAuthor), nil
 }
 
 // List returns authors with filtering and pagination.
 func (r *author) List(ctx context.Context, filter query.AuthorListFilter, options ...db.Query) (output []*model.Author, err error) {
-	// TODO: 一緒に実装しましょう
-	return nil, nil
+	// Step 1: Modifierの配列を初期化（WHERE句などの条件を格納）
+	mods := []bob.Mod[*dialect.SelectQuery]{}
+
+	// Step 2: フィルター条件があれば追加（今は空のまま）
+	// TODO: filter.Nameがある場合の処理を追加
+
+	// Step 3: 全件取得のクエリを実行
+	// .All() は複数件取得するメソッド
+	dbAuthors, err := dbmodels.Authors.Query(mods...).All(ctx, r.dbClient)
+	if err != nil {
+		return nil, err
+	}
+
+	// Step 4: 型変換: []*dbmodels.Author → []*model.Author
+	// スライスは要素ごとに変換する必要がある
+	authors := make([]*model.Author, len(dbAuthors)) // 結果用のスライスを作成
+	for i, dbAuthor := range dbAuthors {
+		// 各要素を型変換
+		authors[i] = (*model.Author)(dbAuthor)
+	}
+
+	return authors, nil
 }
