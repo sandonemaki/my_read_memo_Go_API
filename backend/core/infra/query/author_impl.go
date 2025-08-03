@@ -21,7 +21,7 @@ func NewAuthor(dbClient *db.Client) query.Author {
 	return &author{dbClient}
 }
 
-func (r *author) GetByID(ctx context.Context, query query.AuthorGetQuery, orFail bool, options ...db.Query) (output *model.Author, err error) {
+func (r *author) GetByID(ctx context.Context, query query.AuthorGetQuery, orFail bool) (output *model.Author, err error) {
 	mods := []bob.Mod[*dialect.SelectQuery]{}
 
 	// GetByIDメソッドなので、IDのみで検索
@@ -49,11 +49,13 @@ func (r *author) GetByID(ctx context.Context, query query.AuthorGetQuery, orFail
 	}
 
 	// 型変換: dbmodels.Author → model.Author
+	// 現在は型エイリアスなので直接キャスト可能だが、
+	// 将来OpenAPI生成型を使う場合は明示的なフィールドマッピングが必要
 	return (*model.Author)(dbAuthor), nil
 }
 
 // List returns authors with filtering and pagination.
-func (r *author) List(ctx context.Context, filter query.AuthorListFilter, options ...db.Query) (output []*model.Author, err error) {
+func (r *author) List(ctx context.Context, filter query.AuthorListFilter) (output []*model.Author, err error) {
 	// Step 1: Modifierの配列を初期化（WHERE句などの条件を格納）
 	mods := []bob.Mod[*dialect.SelectQuery]{}
 
