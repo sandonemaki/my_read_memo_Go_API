@@ -30,7 +30,8 @@ func (r *author) GetByID(ctx context.Context, query query.AuthorGetQuery, orFail
 	}
 
 	// Bob ORMでクエリを構築して実行
-	dbAuthor, err := dbmodels.Authors.Query(mods...).One(ctx, r.dbClient)
+	// Get(ctx)でコンテキストに応じた適切なDB接続（通常 or トランザクション）を取得
+	dbAuthor, err := dbmodels.Authors.Query(mods...).One(ctx, r.dbClient.Get(ctx))
 
 	// エラーハンドリング
 	if err != nil {
@@ -63,7 +64,8 @@ func (r *author) List(ctx context.Context, filter query.AuthorListFilter) (outpu
 
 	// Step 3: 全件取得のクエリを実行
 	// .All() は複数件取得するメソッド
-	dbAuthors, err := dbmodels.Authors.Query(mods...).All(ctx, r.dbClient)
+	// Get(ctx)でコンテキストに応じた適切なDB接続（通常 or トランザクション）を取得
+	dbAuthors, err := dbmodels.Authors.Query(mods...).All(ctx, r.dbClient.Get(ctx))
 	if err != nil {
 		return nil, err
 	}

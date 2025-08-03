@@ -27,7 +27,8 @@ func (r *user) GetByUID(ctx context.Context, query query.UserGetQuery) (user *mo
 		mods = append(mods, dbmodels.SelectWhere.Users.UID.EQ(query.UID.String))
 	}
 
-	dbUser, err := dbmodels.Users.Query(mods...).One(ctx, r.dbClient)
+	// Get(ctx)でコンテキストに応じた適切なDB接続（通常 or トランザクション）を取得
+	dbUser, err := dbmodels.Users.Query(mods...).One(ctx, r.dbClient.Get(ctx))
 	if err != nil {
 		return nil, err
 	}
