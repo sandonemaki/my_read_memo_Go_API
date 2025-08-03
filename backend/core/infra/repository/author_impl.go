@@ -59,9 +59,3 @@ func (r *author) Update(ctx context.Context, author *model.Author) (authorID int
 	// Step 4: 更新されたレコードのIDを返す
 	return updatedAuthor.ID, nil
 }
-
-// Delete deletes an author by ID.
-func (r *author) Delete(ctx context.Context, authorID int64) (err error) {
-	// TODO: 一緒に実装しましょう
-	return nil
-}

@@ -12,6 +12,4 @@ type Publisher interface {
 	Create(ctx context.Context, publisher *model.Publisher) (publisherID int64, err error)
 	// Update updates an existing publisher.
 	Update(ctx context.Context, publisher *model.Publisher) (publisherID int64, err error)
-	// Delete deletes a publisher by ID.
-	Delete(ctx context.Context, publisherID int64) (err error)
 }

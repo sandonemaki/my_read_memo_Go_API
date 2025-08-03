@@ -12,6 +12,4 @@ type Author interface {
 	Create(ctx context.Context, author *model.Author) (authorID int64, err error)
 	// Update updates an existing author.
 	Update(ctx context.Context, author *model.Author) (authorID int64, err error)
-	// Delete deletes an author by ID.
-	Delete(ctx context.Context, authorID int64) (err error)
 }
