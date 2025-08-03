@@ -25,22 +25,39 @@ func (r *author) Create(ctx context.Context, author *model.Author) (authorID int
 	setter := &dbmodels.AuthorSetter{
 		Name: &author.Name,
 	}
-	
+
 	// Step 2: Bob ORMでINSERT実行して作成されたレコードを取得
 	// Insert()でINSERT文を構築、One()で実行して作成されたレコードを取得
 	createdAuthor, err := dbmodels.Authors.Insert(setter).One(ctx, r.dbClient)
 	if err != nil {
 		return 0, err
 	}
-	
+
 	// Step 3: 作成されたレコードのIDを返す
 	return createdAuthor.ID, nil
 }
 
 // Update updates an existing author.
 func (r *author) Update(ctx context.Context, author *model.Author) (authorID int64, err error) {
-	// TODO: 一緒に実装しましょう
-	return 0, nil
+	// idからユーザーを取得
+
+	setter := &dbmodels.AuthorSetter{
+		Name: &author.Name,
+	}
+
+	// Step 2: WHERE句を作成（更新対象をIDで特定）
+	mods := dbmodels.UpdateWhere.Authors.ID.EQ(author.ID)
+
+	// Step 3: UPDATE実行して更新されたレコードを取得
+	// Update()でUPDATE文を構築、One()で実行して更新後のレコードを取得
+	updatedAuthor, err := dbmodels.Authors.Update(setter.UpdateMod(), mods).One(ctx, r.dbClient)
+	if err != nil {
+		// sql.ErrNoRows の場合は更新対象が存在しない
+		return 0, err
+	}
+
+	// Step 4: 更新されたレコードのIDを返す
+	return updatedAuthor.ID, nil
 }
 
 // Delete deletes an author by ID.
