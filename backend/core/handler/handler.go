@@ -20,10 +20,10 @@ import (
 var _ oapi.StrictServerInterface = (*Core)(nil)
 
 type Core struct {
+	Unimplemented                 // 手動で作成したUnimplementedを埋め込み
 	Logger           *slog.Logger // 大文字に変更して外部アクセス可能
 	firebaseAuthGlue firebase.FirebaseAuthGlue
 	userUsecase      usecase.User
-	Unimplemented    // 手動で作成したUnimplementedを埋め込み
 }
 
 func NewCore(
