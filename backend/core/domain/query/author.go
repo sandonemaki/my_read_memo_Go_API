@@ -21,6 +21,5 @@ type AuthorListFilter struct {
 }
 
 type AuthorGetQuery struct {
-	ID   null.Int64
-	Name null.String
+	ID null.Int64
 }
