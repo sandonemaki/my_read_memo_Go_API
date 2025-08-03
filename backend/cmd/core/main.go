@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -59,7 +60,7 @@ func main() {
 	// 1. サーバーをgorutineで起動
 	go func() {
 		core.Logger.Info("server is running", slog.String("addr", server.Addr))
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			core.Logger.Error("server closed", slog.Any("err", err))
 			os.Exit(1)
 		}
