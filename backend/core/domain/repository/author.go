@@ -11,5 +11,6 @@ type Author interface {
 	// Create creates a new author.
 	Create(ctx context.Context, author *model.Author) (authorID int64, err error)
 	// Update updates an existing author.
-	Update(ctx context.Context, author *model.Author) (authorID int64, err error)
+	// TODO: OpenAPIにPUTエンドポイントを追加後に有効化
+	// Update(ctx context.Context, author *model.Author) (authorID int64, err error)
 }

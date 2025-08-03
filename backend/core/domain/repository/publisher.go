@@ -11,5 +11,6 @@ type Publisher interface {
 	// Create creates a new publisher.
 	Create(ctx context.Context, publisher *model.Publisher) (publisherID int64, err error)
 	// Update updates an existing publisher.
-	Update(ctx context.Context, publisher *model.Publisher) (publisherID int64, err error)
+	// TODO: OpenAPIにPUTエンドポイントを追加後に有効化
+	// Update(ctx context.Context, publisher *model.Publisher) (publisherID int64, err error)
 }

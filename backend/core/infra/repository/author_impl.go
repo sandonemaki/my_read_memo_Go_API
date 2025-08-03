@@ -38,6 +38,8 @@ func (r *author) Create(ctx context.Context, author *model.Author) (authorID int
 }
 
 // Update updates an existing author.
+// TODO: OpenAPIにPUTエンドポイントを追加後に有効化
+/*
 func (r *author) Update(ctx context.Context, author *model.Author) (authorID int64, err error) {
 	// idからユーザーを取得
 
@@ -59,3 +61,4 @@ func (r *author) Update(ctx context.Context, author *model.Author) (authorID int
 	// Step 4: 更新されたレコードのIDを返す
 	return updatedAuthor.ID, nil
 }
+*/
