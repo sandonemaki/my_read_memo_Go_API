@@ -9,7 +9,6 @@ import (
 
 //go:generate mockgen -source publisher.go -destination mock/mock_publisher.go
 type Publisher interface {
-	// List returns publishers with filtering and pagination.
 	List(ctx context.Context, filter PublisherListFilter) (output []*model.Publisher, err error)
 	// GetByID returns the publisher with the given ID.
 	GetByID(ctx context.Context, query PublisherGetQuery, orFail bool) (output *model.Publisher, err error)

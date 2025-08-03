@@ -9,7 +9,6 @@ import (
 
 //go:generate mockgen -source author.go -destination mock/mock_author.go
 type Author interface {
-	// List returns authors with filtering and pagination.
 	List(ctx context.Context, filter AuthorListFilter) (output []*model.Author, err error)
 	// GetByID returns the author with the given ID.
 	GetByID(ctx context.Context, query AuthorGetQuery, orFail bool) (output *model.Author, err error)
