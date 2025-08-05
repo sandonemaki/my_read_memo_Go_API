@@ -28,7 +28,7 @@ func (r *author) Create(ctx context.Context, author *model.Author) (authorID int
 
 	// Step 2: Bob ORMでINSERT実行して作成されたレコードを取得
 	// Insert()でINSERT文を構築、One()で実行して作成されたレコードを取得
-	createdAuthor, err := dbmodels.Authors.Insert(setter).One(ctx, r.dbClient)
+	createdAuthor, err := dbmodels.Authors.Insert(setter).One(ctx, r.dbClient.Get(ctx))
 	if err != nil {
 		return 0, err
 	}
