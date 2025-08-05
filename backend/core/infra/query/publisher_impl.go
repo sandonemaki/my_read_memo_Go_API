@@ -17,11 +17,11 @@ type publisher struct {
 	dbClient *db.Client
 }
 
-func NewPublisher(dbClient *db.Client) *publisher {
+func NewPublisher(dbClient *db.Client) query.Publisher {
 	return &publisher{dbClient}
 }
 
-func (p *publisher) GetPublisherByID(ctx context.Context, query query.PublisherGetQuery, orFail bool) (output *model.Publisher, err error) {
+func (p *publisher) GetByID(ctx context.Context, query query.PublisherGetQuery, orFail bool) (output *model.Publisher, err error) {
 	mods := []bob.Mod[*dialect.SelectQuery]{}
 
 	if query.ID.Valid {
@@ -42,7 +42,7 @@ func (p *publisher) GetPublisherByID(ctx context.Context, query query.PublisherG
 	return (*model.Publisher)(dbPublisher), nil
 }
 
-func (p *publisher) ListPublishers(ctx context.Context, filter query.PublisherListFilter) (output []*model.Publisher, err error) {
+func (p *publisher) List(ctx context.Context, filter query.PublisherListFilter) (output []*model.Publisher, err error) {
 
 	mods := []bob.Mod[*dialect.SelectQuery]{}
 
