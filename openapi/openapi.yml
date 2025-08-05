@@ -364,6 +364,109 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /master-books/{id}:
+    get:
+      tags:
+        - master_books
+      summary: マスターブック情報を取得
+      description: 指定されたIDの本の詳細情報を取得します
+      operationId: GetMasterBookById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: 本の一意識別子
+      responses:
+        '200':
+          description: マスターブック情報取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MasterBookResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+    put:
+      tags:
+        - master_books
+      summary: マスターブック情報を更新
+      description: 指定されたIDの本の情報を更新します
+      operationId: UpdateMasterBook
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: 本の一意識別子
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMasterBook'
+      responses:
+        '200':
+          description: マスターブック更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MasterBookResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /master-books/search:
+    get:
+      tags:
+        - master_books
+      summary: マスターブックをタイトルで検索
+      description: 本のタイトルで部分一致検索を行います
+      operationId: SearchMasterBooks
+      parameters:
+        - in: query
+          name: title
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+          description: 検索する本のタイトル（部分一致）
+          example: "ノルウェイ"
+      responses:
+        '200':
+          description: 検索結果取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  books:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MasterBook'
+                required:
+                  - books
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
 components:
   securitySchemes:
     BearerAuth:
@@ -626,6 +729,52 @@ components:
         - updated_at
 
     CreateMasterBook:
+      type: object
+      properties:
+        title:
+          type: string
+          description: 本のタイトル
+          example: "ノルウェイの森"
+          minLength: 1
+          maxLength: 200
+        author_id:
+          type: integer
+          format: int64
+          description: 著者の一意識別子
+          example: 1
+        publisher_id:
+          type: integer
+          format: int64
+          description: 出版社の一意識別子
+          example: 1
+        total_page:
+          type: integer
+          description: 総ページ数
+          example: 400
+          minimum: 1
+          maximum: 9999
+        isbn:
+          type: string
+          description: ISBN（任意）
+          example: "9784087520439"
+          maxLength: 13
+        cover_s3_url:
+          type: string
+          description: 表紙画像のS3 URL（任意）
+          example: "https://s3.example.com/covers/book123.jpg"
+          maxLength: 255
+        published_at:
+          type: string
+          format: date
+          description: 出版日（任意）
+          example: "2024-01-01"
+      required:
+        - title
+        - author_id
+        - publisher_id
+        - total_page
+
+    UpdateMasterBook:
       type: object
       properties:
         title:
