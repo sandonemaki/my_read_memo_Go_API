@@ -82,7 +82,7 @@ func (p *publisher) GetByID(ctx context.Context, query query.PublisherGetQuery, 
 // 戻り値:
 //   - output: 出版社のスライス
 //   - err: エラー情報
-func (p *publisher) List(ctx context.Context, filter query.PublisherListFilter) (output []*model.Publisher, err error) {
+func (p *publisher) List(ctx context.Context) (output []*model.Publisher, err error) {
 	// クエリモディファイア（現在は条件なしで全件取得）
 	// private（ローカル変数）: メソッド内でのみ使用
 	mods := []bob.Mod[*dialect.SelectQuery]{}

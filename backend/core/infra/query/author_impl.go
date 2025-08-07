@@ -55,7 +55,7 @@ func (r *author) GetByID(ctx context.Context, query query.AuthorGetQuery, orFail
 	return (*model.Author)(dbAuthor), nil
 }
 
-func (r *author) List(ctx context.Context, filter query.AuthorListFilter) (output []*model.Author, err error) {
+func (r *author) List(ctx context.Context) (output []*model.Author, err error) {
 	// Step 1: Modifierの配列を初期化（WHERE句などの条件を格納）
 	mods := []bob.Mod[*dialect.SelectQuery]{}
 
