@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"context"
 	"errors"
 	"testing"
 	"time"
@@ -48,7 +47,7 @@ func TestMockCreatePublisher(t *testing.T) {
 	)
 	
 	// 固定時刻（必要な場合に使用）
-	fixedTime := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)
+	_ = time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	// ===== Step 2: テストケースの定義 =====
 	vectors := map[string]struct {

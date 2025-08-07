@@ -8,7 +8,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/model"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/query"
-	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/repository"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase/input"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/usecase/output"
 )
@@ -19,7 +18,7 @@ type mockPublisherQuery struct {
 	// GetByIDの振る舞いを定義する関数
 	GetByIDFunc func(ctx context.Context, query query.PublisherGetQuery, orFail bool) (*model.Publisher, error)
 	// Listの振る舞いを定義する関数
-	ListFunc func(ctx context.Context, filter query.PublisherListFilter) ([]*model.Publisher, error)
+	ListFunc func(ctx context.Context) ([]*model.Publisher, error)
 }
 
 // GetByID はモックのGetByID実装
@@ -31,9 +30,9 @@ func (m *mockPublisherQuery) GetByID(ctx context.Context, q query.PublisherGetQu
 }
 
 // List はモックのList実装
-func (m *mockPublisherQuery) List(ctx context.Context, filter query.PublisherListFilter) ([]*model.Publisher, error) {
+func (m *mockPublisherQuery) List(ctx context.Context) ([]*model.Publisher, error) {
 	if m.ListFunc != nil {
-		return m.ListFunc(ctx, filter)
+		return m.ListFunc(ctx)
 	}
 	return nil, nil
 }
@@ -41,7 +40,7 @@ func (m *mockPublisherQuery) List(ctx context.Context, filter query.PublisherLis
 // mockPublisherRepository はrepository.Publisherインターフェースのモック実装
 type mockPublisherRepository struct {
 	// Createの振る舞いを定義する関数
-	CreateFunc func(ctx context.Context, publisher *model.Publisher) error
+	CreateFunc func(ctx context.Context, publisher *model.Publisher) (int64, error)
 	// UpdateByIDの振る舞いを定義する関数
 	UpdateByIDFunc func(ctx context.Context, publisher *model.Publisher) error
 	// DeleteByIDの振る舞いを定義する関数
@@ -49,11 +48,11 @@ type mockPublisherRepository struct {
 }
 
 // Create はモックのCreate実装
-func (m *mockPublisherRepository) Create(ctx context.Context, publisher *model.Publisher) error {
+func (m *mockPublisherRepository) Create(ctx context.Context, publisher *model.Publisher) (int64, error) {
 	if m.CreateFunc != nil {
 		return m.CreateFunc(ctx, publisher)
 	}
-	return nil
+	return 0, nil
 }
 
 // UpdateByID はモックのUpdateByID実装
@@ -103,14 +102,13 @@ func TestMockCreatePublisher_WithInterfaceMock(t *testing.T) {
 				mockQuery := &mockPublisherQuery{}
 				mockRepo := &mockPublisherRepository{
 					// Create時の振る舞い：引数のPublisherにIDを設定して成功
-					CreateFunc: func(ctx context.Context, publisher *model.Publisher) error {
+					CreateFunc: func(ctx context.Context, publisher *model.Publisher) (int64, error) {
 						// 入力値の検証（SQLではなくビジネスロジックの検証）
 						if publisher.Name != TestName {
 							t.Errorf("unexpected name: got %s, want %s", publisher.Name, TestName)
 						}
-						// DBが自動採番するIDをシミュレート
-						publisher.ID = TestID
-						return nil
+						// DBが自動採番するIDを返す
+						return TestID, nil
 					},
 				}
 				return mockQuery, mockRepo
@@ -126,9 +124,9 @@ func TestMockCreatePublisher_WithInterfaceMock(t *testing.T) {
 				// バリデーションエラーの場合、repository.Createは呼ばれない
 				mockQuery := &mockPublisherQuery{}
 				mockRepo := &mockPublisherRepository{
-					CreateFunc: func(ctx context.Context, publisher *model.Publisher) error {
+					CreateFunc: func(ctx context.Context, publisher *model.Publisher) (int64, error) {
 						t.Error("CreateFunc should not be called for validation error")
-						return nil
+						return 0, nil
 					},
 				}
 				return mockQuery, mockRepo
@@ -144,8 +142,8 @@ func TestMockCreatePublisher_WithInterfaceMock(t *testing.T) {
 				mockQuery := &mockPublisherQuery{}
 				mockRepo := &mockPublisherRepository{
 					// リポジトリ層でエラーを返す
-					CreateFunc: func(ctx context.Context, publisher *model.Publisher) error {
-						return errors.New("repository error")
+					CreateFunc: func(ctx context.Context, publisher *model.Publisher) (int64, error) {
+						return 0, errors.New("repository error")
 					},
 				}
 				return mockQuery, mockRepo
@@ -198,13 +196,13 @@ func TestMockListPublisher_WithInterfaceMock(t *testing.T) {
 
 	vectors := map[string]struct {
 		params    input.ListPublisher
-		expected  *output.ListPublisher
+		expected  *output.ListPublishers
 		wantErr   error
 		setupMock func() (*mockPublisherQuery, *mockPublisherRepository)
 	}{
 		"OK": {
 			params: input.ListPublisher{},
-			expected: &output.ListPublisher{
+			expected: &output.ListPublishers{
 				Publishers: testPublishers,
 			},
 			wantErr: nil,
@@ -212,7 +210,7 @@ func TestMockListPublisher_WithInterfaceMock(t *testing.T) {
 				mockQuery := &mockPublisherQuery{
 					// List時の振る舞い：固定のリストを返す
 					// sqlmockではSELECT文を書くが、ここでは単純にデータを返す
-					ListFunc: func(ctx context.Context, filter query.PublisherListFilter) ([]*model.Publisher, error) {
+					ListFunc: func(ctx context.Context) ([]*model.Publisher, error) {
 						// フィルター条件の検証などの
 						// ビジネスロジックをここでテスト可能
 						return testPublishers, nil
@@ -224,13 +222,13 @@ func TestMockListPublisher_WithInterfaceMock(t *testing.T) {
 		},
 		"Empty": {
 			params: input.ListPublisher{},
-			expected: &output.ListPublisher{
+			expected: &output.ListPublishers{
 				Publishers: []*model.Publisher{},
 			},
 			wantErr: nil,
 			setupMock: func() (*mockPublisherQuery, *mockPublisherRepository) {
 				mockQuery := &mockPublisherQuery{
-					ListFunc: func(ctx context.Context, filter query.PublisherListFilter) ([]*model.Publisher, error) {
+					ListFunc: func(ctx context.Context) ([]*model.Publisher, error) {
 						// 空のリストを返す
 						return []*model.Publisher{}, nil
 					},
@@ -245,7 +243,7 @@ func TestMockListPublisher_WithInterfaceMock(t *testing.T) {
 			wantErr:  errors.New("query error"),
 			setupMock: func() (*mockPublisherQuery, *mockPublisherRepository) {
 				mockQuery := &mockPublisherQuery{
-					ListFunc: func(ctx context.Context, filter query.PublisherListFilter) ([]*model.Publisher, error) {
+					ListFunc: func(ctx context.Context) ([]*model.Publisher, error) {
 						return nil, errors.New("query error")
 					},
 				}
@@ -268,7 +266,7 @@ func TestMockListPublisher_WithInterfaceMock(t *testing.T) {
 
 			// ビジネスロジックの実行
 			// SQLは実行されず、モックの振る舞いが呼ばれる
-			actual, err := usecase.List(context.Background(), v.params)
+			actual, err := usecase.List(context.Background())
 
 			// エラーの検証
 			if v.wantErr != nil {
