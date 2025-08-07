@@ -41,6 +41,21 @@ func (p *GetPublisherByID) Validate() error {
 	return nil
 }
 
+// ListPublisher is input for listing publishers
+func NewListPublisher() ListPublisher {
+	return ListPublisher{}
+}
+
+type ListPublisher struct {
+	// 現時点ではフィルター条件なし
+	// 将来的にページングやソートが必要になったら追加
+}
+
+func (p *ListPublisher) Validate() error {
+	// 現時点では検証なし
+	return nil
+}
+
 // SearchPublisher is input for searching publishers by name
 func NewSearchPublisher(name string) SearchPublisher {
 	return SearchPublisher{
