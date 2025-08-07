@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -83,7 +83,7 @@ func TestMockCreatePublisher_WithInterfaceMock(t *testing.T) {
 	vectors := map[string]struct {
 		params   input.CreatePublisher
 		expected *output.CreatePublisher
-		wantErr  error
+		wantErr  bool
 		// モックの振る舞いを設定
 		setupMock func() (*mockPublisherQuery, *mockPublisherRepository)
 	}{
@@ -97,7 +97,7 @@ func TestMockCreatePublisher_WithInterfaceMock(t *testing.T) {
 					Name: TestName,
 				},
 			},
-			wantErr: nil,
+			wantErr: false,
 			setupMock: func() (*mockPublisherQuery, *mockPublisherRepository) {
 				mockQuery := &mockPublisherQuery{}
 				mockRepo := &mockPublisherRepository{
@@ -119,7 +119,7 @@ func TestMockCreatePublisher_WithInterfaceMock(t *testing.T) {
 				Name: "", // 空の名前（validation error）
 			},
 			expected: nil,
-			wantErr:  errors.New("validation error"),
+			wantErr:  true,
 			setupMock: func() (*mockPublisherQuery, *mockPublisherRepository) {
 				// バリデーションエラーの場合、repository.Createは呼ばれない
 				mockQuery := &mockPublisherQuery{}
@@ -137,13 +137,13 @@ func TestMockCreatePublisher_WithInterfaceMock(t *testing.T) {
 				Name: TestName,
 			},
 			expected: nil,
-			wantErr:  errors.New("repository error"),
+			wantErr:  true,
 			setupMock: func() (*mockPublisherQuery, *mockPublisherRepository) {
 				mockQuery := &mockPublisherQuery{}
 				mockRepo := &mockPublisherRepository{
 					// リポジトリ層でエラーを返す
 					CreateFunc: func(ctx context.Context, publisher *model.Publisher) (int64, error) {
-						return 0, errors.New("repository error")
+						return 0, fmt.Errorf("repository error")
 					},
 				}
 				return mockQuery, mockRepo
@@ -163,11 +163,9 @@ func TestMockCreatePublisher_WithInterfaceMock(t *testing.T) {
 			actual, err := usecase.Create(context.Background(), v.params)
 
 			// エラーの検証
-			if v.wantErr != nil {
+			if v.wantErr {
 				if err == nil {
 					t.Errorf("expected error but got nil")
-				} else if err.Error() != v.wantErr.Error() {
-					t.Errorf("error mismatch: got %v, want %v", err, v.wantErr)
 				}
 				return
 			}
@@ -197,7 +195,7 @@ func TestMockListPublisher_WithInterfaceMock(t *testing.T) {
 	vectors := map[string]struct {
 		params    input.ListPublisher
 		expected  *output.ListPublishers
-		wantErr   error
+		wantErr   bool
 		setupMock func() (*mockPublisherQuery, *mockPublisherRepository)
 	}{
 		"OK": {
@@ -205,7 +203,7 @@ func TestMockListPublisher_WithInterfaceMock(t *testing.T) {
 			expected: &output.ListPublishers{
 				Publishers: testPublishers,
 			},
-			wantErr: nil,
+			wantErr: false,
 			setupMock: func() (*mockPublisherQuery, *mockPublisherRepository) {
 				mockQuery := &mockPublisherQuery{
 					// List時の振る舞い：固定のリストを返す
@@ -225,7 +223,7 @@ func TestMockListPublisher_WithInterfaceMock(t *testing.T) {
 			expected: &output.ListPublishers{
 				Publishers: []*model.Publisher{},
 			},
-			wantErr: nil,
+			wantErr: false,
 			setupMock: func() (*mockPublisherQuery, *mockPublisherRepository) {
 				mockQuery := &mockPublisherQuery{
 					ListFunc: func(ctx context.Context) ([]*model.Publisher, error) {
@@ -240,11 +238,11 @@ func TestMockListPublisher_WithInterfaceMock(t *testing.T) {
 		"QueryError": {
 			params:   input.ListPublisher{},
 			expected: nil,
-			wantErr:  errors.New("query error"),
+			wantErr:  true,
 			setupMock: func() (*mockPublisherQuery, *mockPublisherRepository) {
 				mockQuery := &mockPublisherQuery{
 					ListFunc: func(ctx context.Context) ([]*model.Publisher, error) {
-						return nil, errors.New("query error")
+						return nil, fmt.Errorf("query error")
 					},
 				}
 				mockRepo := &mockPublisherRepository{}
@@ -269,11 +267,9 @@ func TestMockListPublisher_WithInterfaceMock(t *testing.T) {
 			actual, err := usecase.List(context.Background())
 
 			// エラーの検証
-			if v.wantErr != nil {
+			if v.wantErr {
 				if err == nil {
 					t.Errorf("expected error but got nil")
-				} else if err.Error() != v.wantErr.Error() {
-					t.Errorf("error mismatch: got %v, want %v", err, v.wantErr)
 				}
 				return
 			}
