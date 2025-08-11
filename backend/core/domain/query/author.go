@@ -9,13 +9,9 @@ import (
 
 //go:generate mockgen -source author.go -destination mock/mock_author.go
 type Author interface {
-	List(ctx context.Context, filter AuthorListFilter) (output []*model.Author, err error)
+	List(ctx context.Context) (output []*model.Author, err error)
 	// GetByID returns the author with the given ID.
 	GetByID(ctx context.Context, query AuthorGetQuery, orFail bool) (output *model.Author, err error)
-}
-
-type AuthorListFilter struct {
-	Name null.String // 名前での部分一致検索
 }
 
 type AuthorGetQuery struct {
