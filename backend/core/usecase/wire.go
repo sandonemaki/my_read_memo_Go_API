@@ -31,12 +31,12 @@ func NewPublisherDI(*sql.DB) (_ Publisher) {
 	return
 }
 
-// func NewAuthorDI(*sql.DB) (_ Author) {
-// 	wire.Build(
-// 		db.NewDB,
-// 		query.NewAuthor,
-// 		repository.NewAuthor,
-// 		NewAuthor,
-// 	)
-// 	return
-// }
+func NewAuthorDI(*sql.DB) (_ Author) {
+	wire.Build(
+		db.NewDB,
+		query.NewAuthor,
+		repository.NewAuthor,
+		NewAuthor,
+	)
+	return
+}

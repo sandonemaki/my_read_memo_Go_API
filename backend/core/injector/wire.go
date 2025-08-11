@@ -26,12 +26,12 @@ func InitializeCoreHandler(loggerConfig config.Logger, postgresConfig config.Pos
 		query.NewUser,
 		repository.NewUser,
 		repository.NewPublisher,
-		// repository.NewAuthor,
+		repository.NewAuthor,
 		query.NewPublisher,
-		// query.NewAuthor,
+		query.NewAuthor,
 		usecase.NewUser,
 		usecase.NewPublisher,
-		// usecase.NewAuthor,
+		usecase.NewAuthor,
 		handler.NewCore,
 	)
 	return nil, nil

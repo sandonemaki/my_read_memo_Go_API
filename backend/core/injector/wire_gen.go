@@ -35,6 +35,9 @@ func InitializeCoreHandler(loggerConfig config.Logger, postgresConfig config.Pos
 	publisher := query.NewPublisher(client)
 	repositoryPublisher := repository.NewPublisher(client)
 	usecasePublisher := usecase.NewPublisher(publisher, repositoryPublisher)
-	core := handler.NewCore(slogLogger, firebaseAuthGlue, usecaseUser, usecasePublisher)
+	author := query.NewAuthor(client)
+	repositoryAuthor := repository.NewAuthor(client)
+	usecaseAuthor := usecase.NewAuthor(author, repositoryAuthor)
+	core := handler.NewCore(slogLogger, firebaseAuthGlue, usecaseUser, usecasePublisher, usecaseAuthor)
 	return core, nil
 }

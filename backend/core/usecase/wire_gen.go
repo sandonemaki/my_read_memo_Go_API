@@ -30,3 +30,11 @@ func NewPublisherDI(sqlDB *sql.DB) Publisher {
 	usecasePublisher := NewPublisher(queryPublisher, repositoryPublisher)
 	return usecasePublisher
 }
+
+func NewAuthorDI(sqlDB *sql.DB) Author {
+	client := db.NewDB(sqlDB)
+	queryAuthor := query.NewAuthor(client)
+	repositoryAuthor := repository.NewAuthor(client)
+	usecaseAuthor := NewAuthor(queryAuthor, repositoryAuthor)
+	return usecaseAuthor
+}
