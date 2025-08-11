@@ -3,10 +3,11 @@ package db
 import (
 	"context"
 	"database/sql"
+	"strings"
 	"time"
 
-	"github.com/stephenafamo/scan"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/util"
+	"github.com/stephenafamo/scan"
 )
 
 // Client :
@@ -72,4 +73,13 @@ func (w *TxWrapper) QueryContext(ctx context.Context, query string, args ...any)
 		return nil, err
 	}
 	return rows, nil
+}
+
+// escapeLikePattern はLIKEパターンの特殊文字をエスケープする
+// SQLインジェクション対策として、%, _, \をエスケープ
+func EscapeLikePattern(s string) string {
+	s = strings.ReplaceAll(s, "\\", "\\\\") // \ → \\
+	s = strings.ReplaceAll(s, "%", "\\%")   // % → \%
+	s = strings.ReplaceAll(s, "_", "\\_")   // _ → \_
+	return s
 }

@@ -15,7 +15,7 @@ type masterBook struct {
 	dbClient *db.Client
 }
 
-func NewMMasterBook(dbClient *db.Client) query.MasterBook {
+func NewMasterBook(dbClient *db.Client) query.MasterBook {
 	return &masterBook{dbClient}
 }
 
@@ -25,19 +25,26 @@ func (m *masterBook) Search(ctx context.Context, query query.MasterBookSearchQue
 	if query.AuthorName.Valid {
 		// 1. 著者名検索の場合、authorsテーブルとJOIN
 		mods = append(mods, dbmodels.SelectJoins.MasterBooks.InnerJoin.Author)
+		// SQLインジェクション対策
+		pattern := "%" + db.EscapeLikePattern(query.AuthorName.String) + "%"
+
 		// authors.nameで検索（部分一致、大文字小文字区別なし）
-		mods = append(mods, dbmodels.SelectWhere.Authors.Name.ILike("%"+query.AuthorName.String+"%"))
+		mods = append(mods, dbmodels.SelectWhere.Authors.Name.ILike(pattern))
 	}
 
 	// 出版社名検索
 	if query.PublisherName.Valid {
 		mods = append(mods, dbmodels.SelectJoins.MasterBooks.InnerJoin.Publisher)
-		mods = append(mods, dbmodels.SelectWhere.Publishers.Name.ILike("%"+query.PublisherName.String+"%"))
+		pattern := "%" + db.EscapeLikePattern(query.PublisherName.String) + "%"
+
+		mods = append(mods, dbmodels.SelectWhere.Publishers.Name.ILike(pattern))
 	}
 
 	// タイトル検索
 	if query.Title.Valid {
-		mods = append(mods, dbmodels.SelectWhere.MasterBooks.Title.ILike("%"+query.Title.String+"%"))
+		pattern := "%" + db.EscapeLikePattern(query.Title.String) + "%"
+
+		mods = append(mods, dbmodels.SelectWhere.MasterBooks.Title.ILike(pattern))
 	}
 
 	dbMasterBooks, err := dbmodels.MasterBooks.Query(mods...).All(ctx, m.dbClient.Get(ctx))
