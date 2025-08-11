@@ -25,7 +25,7 @@ type Core struct {
 	firebaseAuthGlue firebase.FirebaseAuthGlue
 	userUsecase      usecase.User
 	publisherUsecase usecase.Publisher
-	// authorUsecase    usecase.Author
+	authorUsecase    usecase.Author
 }
 
 func NewCore(
@@ -33,12 +33,14 @@ func NewCore(
 	firebaseAuthGlue firebase.FirebaseAuthGlue,
 	userUsecase usecase.User,
 	publisherUsecase usecase.Publisher,
+	authorUsecase usecase.Author,
 ) *Core {
 	return &Core{
 		Logger:           logger, // フィールド名も大文字に変更
 		firebaseAuthGlue: firebaseAuthGlue,
 		userUsecase:      userUsecase,
 		publisherUsecase: publisherUsecase,
+		authorUsecase:    authorUsecase,
 	}
 }
 
