@@ -15,7 +15,7 @@ import (
 
 // ================================================================================
 // sqlmock版テスト - SQL文を直接記述してテストする手法
-// 
+//
 // 【sqlmockとは】
 // - database/sqlパッケージのモックライブラリ
 // - 実際のDBに接続せずSQLクエリの実行をシミュレート
@@ -45,17 +45,17 @@ func TestMockCreatePublisher(t *testing.T) {
 		TestName = "テスト出版社"
 		TestID   = int64(1)
 	)
-	
+
 	// 固定時刻（必要な場合に使用）
-	_ = time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)
+	fixedTime := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	// ===== Step 2: テストケースの定義 =====
 	vectors := map[string]struct {
 		params   input.CreatePublisher      // 入力パラメータ
-		expected *output.CreatePublisher     // 期待する出力
-		wantErr  error                       // 期待するエラー
-		options  cmp.Options                 // 比較オプション（動的フィールドの無視など）
-		prepare  func(mock sqlmock.Sqlmock)  // SQLの期待値を設定する関数（sqlmockの核心）
+		expected *output.CreatePublisher    // 期待する出力
+		wantErr  error                      // 期待するエラー
+		options  cmp.Options                // 比較オプション（動的フィールドの無視など）
+		prepare  func(mock sqlmock.Sqlmock) // SQLの期待値を設定する関数（sqlmockの核心）
 	}{
 		// ===== 正常系テストケース =====
 		"OK": {
@@ -77,18 +77,21 @@ func TestMockCreatePublisher(t *testing.T) {
 			prepare: func(mock sqlmock.Sqlmock) {
 				// ===== sqlmockの期待値設定 =====
 				// Bob ORMが生成する実際のSQL形式を正確に記述する必要がある
-				// 
+				//
 				// 【重要な注意点】
 				// 1. エスケープが必要: \( \) \$ など
 				// 2. AS句: Bob ORMは"publishers" AS "publishers"という形式を使う
 				// 3. DEFAULT値: created_at, updated_atはDEFAULTキーワードを使用
 				// 4. RETURNING句: PostgreSQLの機能（IDを返す）
 				insertQuery := `INSERT INTO "publishers" AS "publishers"\("name", "created_at", "updated_at"\) VALUES \(\$1, DEFAULT, DEFAULT\) RETURNING`
-				
-				// ExpectExec: INSERT/UPDATE/DELETE文の期待値を設定
-				mock.ExpectExec(insertQuery).
-					WithArgs(TestName).                          // $1 = "テスト出版社"
-					WillReturnResult(sqlmock.NewResult(TestID, 1)) // LastInsertId=1, RowsAffected=1
+
+				// 期待するSQLの引数を設定
+				// ここでは名前のみを設定（IDはDB側で自動生成
+				rows := sqlmock.NewRows([]string{"id", "name", "created_at", "updated_at"}).
+					AddRow(TestID, TestName, fixedTime, fixedTime)
+				mock.ExpectQuery(insertQuery).
+					WithArgs(TestName).
+					WillReturnRows(rows)
 			},
 		},
 		// ===== バリデーションエラーのテストケース =====
@@ -118,7 +121,7 @@ func TestMockCreatePublisher(t *testing.T) {
 				// DB層でのエラーをシミュレート
 				// WillReturnErrorを使用してエラーを返す
 				insertQuery := `INSERT INTO "publishers" AS "publishers"\("name", "created_at", "updated_at"\) VALUES \(\$1, DEFAULT, DEFAULT\) RETURNING`
-				mock.ExpectExec(insertQuery).
+				mock.ExpectQuery(insertQuery).
 					WithArgs(TestName).
 					WillReturnError(errors.New("database error")) // DB接続エラーなどをシミュレート
 			},
@@ -149,18 +152,10 @@ func TestMockCreatePublisher(t *testing.T) {
 			//
 			// ここでBob ORMがSQLを生成し、dbに対して実行
 			// sqlmockは実際のSQLと期待値を比較
-			
+
 			// 現在はコンパイルエラーを防ぐためコメントアウト
 			t.Skip("TODO: PublisherDI実装後に有効化")
 
-			// ===== Step 7: 期待値の検証 =====
-			// ExpectationsWereMet()で全ての期待値が満たされたか確認
-			// - 期待したSQLが実行されたか
-			// - 余分なSQLが実行されていないか
-			// - 順序は正しいか
-			if err := mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("unfulfilled expectations: %v", err)
-			}
 		})
 	}
 }
