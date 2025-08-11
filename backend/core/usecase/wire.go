@@ -20,3 +20,23 @@ func NewUserDI(*sql.DB) (_ User) {
 	)
 	return
 }
+
+func NewPublisherDI(*sql.DB) (_ Publisher) {
+	wire.Build(
+		db.NewDB,
+		query.NewPublisher,
+		repository.NewPublisher,
+		NewPublisher,
+	)
+	return
+}
+
+// func NewAuthorDI(*sql.DB) (_ Author) {
+// 	wire.Build(
+// 		db.NewDB,
+// 		query.NewAuthor,
+// 		repository.NewAuthor,
+// 		NewAuthor,
+// 	)
+// 	return
+// }

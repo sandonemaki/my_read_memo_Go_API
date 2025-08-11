@@ -22,3 +22,11 @@ func NewUserDI(sqlDB *sql.DB) User {
 	usecaseUser := NewUser(queryUser, repositoryUser)
 	return usecaseUser
 }
+
+func NewPublisherDI(sqlDB *sql.DB) Publisher {
+	client := db.NewDB(sqlDB)
+	queryPublisher := query.NewPublisher(client)
+	repositoryPublisher := repository.NewPublisher(client)
+	usecasePublisher := NewPublisher(queryPublisher, repositoryPublisher)
+	return usecasePublisher
+}

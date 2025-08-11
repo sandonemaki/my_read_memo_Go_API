@@ -25,7 +25,13 @@ func InitializeCoreHandler(loggerConfig config.Logger, postgresConfig config.Pos
 		firebase.NewFirebaseAuthGlue,
 		query.NewUser,
 		repository.NewUser,
+		repository.NewPublisher,
+		// repository.NewAuthor,
+		query.NewPublisher,
+		// query.NewAuthor,
 		usecase.NewUser,
+		usecase.NewPublisher,
+		// usecase.NewAuthor,
 		handler.NewCore,
 	)
 	return nil, nil

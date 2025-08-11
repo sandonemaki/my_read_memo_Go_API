@@ -24,17 +24,21 @@ type Core struct {
 	Logger           *slog.Logger // 大文字に変更して外部アクセス可能
 	firebaseAuthGlue firebase.FirebaseAuthGlue
 	userUsecase      usecase.User
+	publisherUsecase usecase.Publisher
+	// authorUsecase    usecase.Author
 }
 
 func NewCore(
 	logger *slog.Logger,
 	firebaseAuthGlue firebase.FirebaseAuthGlue,
 	userUsecase usecase.User,
+	publisherUsecase usecase.Publisher,
 ) *Core {
 	return &Core{
 		Logger:           logger, // フィールド名も大文字に変更
 		firebaseAuthGlue: firebaseAuthGlue,
 		userUsecase:      userUsecase,
+		publisherUsecase: publisherUsecase,
 	}
 }
 
