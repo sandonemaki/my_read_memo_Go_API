@@ -47,8 +47,16 @@ func (_ Unimplemented) GetAuthorById(ctx context.Context, request oapi.GetAuthor
 		},
 	}, nil
 }
-func (_ Unimplemented) GetAuthors(ctx context.Context, request oapi.ListAuthorsRequestObject) (oapi.ListAuthorsResponseObject, error) {
+func (_ Unimplemented) GetAuthors(ctx context.Context, request oapi.GetAuthorsRequestObject) (oapi.GetAuthorsResponseObject, error) {
 	return oapi.GetAuthors500JSONResponse{
+		InternalServerErrorJSONResponse: oapi.InternalServerErrorJSONResponse{
+			Message: "unimplemented",
+		},
+	}, nil
+}
+
+func (_ Unimplemented) SearchAuthors(ctx context.Context, request oapi.SearchAuthorsRequestObject) (oapi.SearchAuthorsResponseObject, error) {
+	return oapi.SearchAuthors500JSONResponse{
 		InternalServerErrorJSONResponse: oapi.InternalServerErrorJSONResponse{
 			Message: "unimplemented",
 		},
@@ -68,8 +76,16 @@ func (_ Unimplemented) GetPublisherById(ctx context.Context, request oapi.GetPub
 		},
 	}, nil
 }
-func (_ Unimplemented) GetPublishers(ctx context.Context, request oapi.ListPublishersRequestObject) (oapi.ListPublishersResponseObject, error) {
+func (_ Unimplemented) GetPublishers(ctx context.Context, request oapi.GetPublishersRequestObject) (oapi.GetPublishersResponseObject, error) {
 	return oapi.GetPublishers500JSONResponse{
+		InternalServerErrorJSONResponse: oapi.InternalServerErrorJSONResponse{
+			Message: "unimplemented",
+		},
+	}, nil
+}
+
+func (_ Unimplemented) SearchPublishers(ctx context.Context, request oapi.SearchPublishersRequestObject) (oapi.SearchPublishersResponseObject, error) {
+	return oapi.SearchPublishers500JSONResponse{
 		InternalServerErrorJSONResponse: oapi.InternalServerErrorJSONResponse{
 			Message: "unimplemented",
 		},
