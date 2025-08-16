@@ -14,6 +14,7 @@ require (
 	github.com/google/wire v0.6.0
 	github.com/jaswdr/faker/v2 v2.5.0
 	github.com/lib/pq v1.10.9
+	github.com/oapi-codegen/runtime v1.1.2
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.20.1
@@ -38,6 +39,7 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.51.0 // indirect
 	github.com/aarondl/json v0.0.0-20221020222930-8b0db17ef1bf // indirect
 	github.com/aarondl/opt v0.0.0-20230114172057-b91f370c41f0 // indirect
+	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cncf/xds/go v0.0.0-20250501225837-2ac532fd4443 // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.32.4 // indirect
@@ -59,7 +61,6 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.6 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.1 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
-	github.com/oapi-codegen/runtime v1.1.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	github.com/qdm12/reprint v0.0.0-20200326205758-722754a53494 // indirect
