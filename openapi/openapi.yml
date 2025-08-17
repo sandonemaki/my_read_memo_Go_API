@@ -7,7 +7,7 @@ security:
 servers:
   - url: https://sample.com
 paths:
-  /users/me:
+  /api/v1/api/v1/users/me:
     get:
       tags:
         - users
@@ -45,14 +45,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
     delete:
       tags:
@@ -69,7 +67,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /authors/{id}:
+  /api/v1/authors/{id}:
     get:
       tags:
         - authors
@@ -96,13 +94,13 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /authors:
+  /api/v1/authors:
     get:
       tags:
         - authors
       summary: 著者一覧を取得
       description: 登録されている全ての著者の一覧を取得します
-      operationId: GetAuthors
+      operationId: ListAuthors
       responses:
         '200':
           description: 著者一覧取得成功
@@ -141,20 +139,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthorResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '409':
-          description: 既に同じ名前の著者が存在します
+        default:
+          description: Error response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+                $ref: '#/components/schemas/Error'
   
-  /authors/search:
+  /api/v1/authors/search:
     get:
       tags:
         - authors
@@ -185,14 +177,14 @@ paths:
                       $ref: '#/components/schemas/Author'
                 required:
                   - authors
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   
-  /publishers/{id}:
+  /api/v1/publishers/{id}:
     get:
       tags:
         - publishers
@@ -219,13 +211,13 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /publishers:
+  /api/v1/publishers:
     get:
       tags:
         - publishers
       summary: 出版社一覧を取得
       description: 登録されている全ての出版社の一覧を取得します
-      operationId: GetPublishers
+      operationId: ListPublishers
       responses:
         '200':
           description: 出版社一覧取得成功
@@ -263,19 +255,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PublisherResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '409':
-          description: 既に同じ名前の出版社が存在します
+        default:
+          description: Error response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-  /publishers/search:
+                $ref: '#/components/schemas/Error'
+  /api/v1/publishers/search:
     get:
       tags:
         - publishers
@@ -306,19 +292,19 @@ paths:
                       $ref: '#/components/schemas/Publisher'
                 required:
                   - publishers
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-  /master-books:
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/v1/master-books:
     get:
       tags:
         - master_books
       summary: マスターブック一覧を取得
       description: 認証ユーザーが登録した本の一覧を取得します
-      operationId: GetMasterBooks
+      operationId: ListMasterBooks
       responses:
         '200':
           description: マスターブック一覧取得成功
@@ -357,14 +343,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MasterBookResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
-  /master-books/{id}:
+  /api/v1/master-books/{id}:
     get:
       tags:
         - master_books
@@ -420,16 +406,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MasterBookResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
-  /master-books/search:
+  /api/v1/master-books/search:
     get:
       tags:
         - master_books
@@ -460,12 +444,12 @@ paths:
                       $ref: '#/components/schemas/MasterBook'
                 required:
                   - books
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   securitySchemes:
@@ -483,7 +467,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: '#/components/schemas/Error'
     Unauthorized:
       description: 認証が必要です
     NotFound:
@@ -493,16 +477,19 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: '#/components/schemas/Error'
 
   schemas:
-    ErrorResponse:
+    Error:
       type: object
       properties:
         message:
           type: string
+        code:
+          type: string
       required:
         - message
+        - code
     UserResponse:
       type: object
       properties:

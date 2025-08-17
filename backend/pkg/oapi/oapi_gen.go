@@ -13,6 +13,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/oapi-codegen/runtime"
 	strictnethttp "github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 const (
@@ -45,15 +46,78 @@ type CreateAuthor struct {
 	Name string `json:"name"`
 }
 
+// CreateMasterBook defines model for CreateMasterBook.
+type CreateMasterBook struct {
+	// AuthorId 著者の一意識別子
+	AuthorId int64 `json:"author_id"`
+
+	// CoverS3Url 表紙画像のS3 URL（任意）
+	CoverS3Url *string `json:"cover_s3_url,omitempty"`
+
+	// Isbn ISBN（任意）
+	Isbn *string `json:"isbn,omitempty"`
+
+	// PublishedAt 出版日（任意）
+	PublishedAt *openapi_types.Date `json:"published_at,omitempty"`
+
+	// PublisherId 出版社の一意識別子
+	PublisherId int64 `json:"publisher_id"`
+
+	// Title 本のタイトル
+	Title string `json:"title"`
+
+	// TotalPage 総ページ数
+	TotalPage int `json:"total_page"`
+}
+
 // CreatePublisher defines model for CreatePublisher.
 type CreatePublisher struct {
 	// Name 出版社名
 	Name string `json:"name"`
 }
 
-// ErrorResponse defines model for ErrorResponse.
-type ErrorResponse struct {
+// Error defines model for Error.
+type Error struct {
+	Code    string `json:"code"`
 	Message string `json:"message"`
+}
+
+// MasterBook defines model for MasterBook.
+type MasterBook struct {
+	// AuthorId 著者の一意識別子
+	AuthorId int64 `json:"author_id"`
+
+	// CoverS3Url 表紙画像のS3 URL
+	CoverS3Url *string `json:"cover_s3_url,omitempty"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"created_at"`
+
+	// Id 本の一意識別子
+	Id int64 `json:"id"`
+
+	// Isbn ISBN
+	Isbn *string `json:"isbn,omitempty"`
+
+	// PublishedAt 出版日
+	PublishedAt *openapi_types.Date `json:"published_at"`
+
+	// PublisherId 出版社の一意識別子
+	PublisherId int64 `json:"publisher_id"`
+
+	// Title 本のタイトル
+	Title string `json:"title"`
+
+	// TotalPage 総ページ数
+	TotalPage int `json:"total_page"`
+
+	// UpdatedAt 最終更新日時
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// MasterBookResponse defines model for MasterBookResponse.
+type MasterBookResponse struct {
+	Book MasterBook `json:"book"`
 }
 
 // Publisher defines model for Publisher.
@@ -74,6 +138,30 @@ type Publisher struct {
 // PublisherResponse defines model for PublisherResponse.
 type PublisherResponse struct {
 	Publisher Publisher `json:"publisher"`
+}
+
+// UpdateMasterBook defines model for UpdateMasterBook.
+type UpdateMasterBook struct {
+	// AuthorId 著者の一意識別子
+	AuthorId int64 `json:"author_id"`
+
+	// CoverS3Url 表紙画像のS3 URL（任意）
+	CoverS3Url *string `json:"cover_s3_url,omitempty"`
+
+	// Isbn ISBN（任意）
+	Isbn *string `json:"isbn,omitempty"`
+
+	// PublishedAt 出版日（任意）
+	PublishedAt *openapi_types.Date `json:"published_at,omitempty"`
+
+	// PublisherId 出版社の一意識別子
+	PublisherId int64 `json:"publisher_id"`
+
+	// Title 本のタイトル
+	Title string `json:"title"`
+
+	// TotalPage 総ページ数
+	TotalPage int `json:"total_page"`
 }
 
 // UpdateUser defines model for UpdateUser.
@@ -109,15 +197,21 @@ type UserResponse struct {
 }
 
 // BadRequest defines model for BadRequest.
-type BadRequest = ErrorResponse
+type BadRequest = Error
 
 // InternalServerError defines model for InternalServerError.
-type InternalServerError = ErrorResponse
+type InternalServerError = Error
 
 // SearchAuthorsParams defines parameters for SearchAuthors.
 type SearchAuthorsParams struct {
 	// Name 検索する著者名（部分一致）
 	Name string `form:"name" json:"name"`
+}
+
+// SearchMasterBooksParams defines parameters for SearchMasterBooks.
+type SearchMasterBooksParams struct {
+	// Title 検索する本のタイトル（部分一致）
+	Title string `form:"title" json:"title"`
 }
 
 // SearchPublishersParams defines parameters for SearchPublishers.
@@ -126,119 +220,170 @@ type SearchPublishersParams struct {
 	Name string `form:"name" json:"name"`
 }
 
+// UpdateMeJSONRequestBody defines body for UpdateMe for application/json ContentType.
+type UpdateMeJSONRequestBody = UpdateUser
+
 // CreateAuthorJSONRequestBody defines body for CreateAuthor for application/json ContentType.
 type CreateAuthorJSONRequestBody = CreateAuthor
+
+// CreateMasterBookJSONRequestBody defines body for CreateMasterBook for application/json ContentType.
+type CreateMasterBookJSONRequestBody = CreateMasterBook
+
+// UpdateMasterBookJSONRequestBody defines body for UpdateMasterBook for application/json ContentType.
+type UpdateMasterBookJSONRequestBody = UpdateMasterBook
 
 // CreatePublisherJSONRequestBody defines body for CreatePublisher for application/json ContentType.
 type CreatePublisherJSONRequestBody = CreatePublisher
 
-// UpdateMeJSONRequestBody defines body for UpdateMe for application/json ContentType.
-type UpdateMeJSONRequestBody = UpdateUser
-
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// 著者一覧を取得
-	// (GET /authors)
-	GetAuthors(w http.ResponseWriter, r *http.Request)
-	// 著者を新規作成
-	// (POST /authors)
-	CreateAuthor(w http.ResponseWriter, r *http.Request)
-	// 著者を名前で検索
-	// (GET /authors/search)
-	SearchAuthors(w http.ResponseWriter, r *http.Request, params SearchAuthorsParams)
-	// 著者情報を取得
-	// (GET /authors/{id})
-	GetAuthorById(w http.ResponseWriter, r *http.Request, id int64)
-	// 出版社一覧を取得
-	// (GET /publishers)
-	GetPublishers(w http.ResponseWriter, r *http.Request)
-	// 出版社を新規作成
-	// (POST /publishers)
-	CreatePublisher(w http.ResponseWriter, r *http.Request)
-	// 出版社を名前で検索
-	// (GET /publishers/search)
-	SearchPublishers(w http.ResponseWriter, r *http.Request, params SearchPublishersParams)
-	// 出版社情報を取得
-	// (GET /publishers/{id})
-	GetPublisherById(w http.ResponseWriter, r *http.Request, id int64)
 	// 現在のユーザーアカウントを削除
-	// (DELETE /users/me)
+	// (DELETE /api/v1/api/v1/users/me)
 	DeleteMe(w http.ResponseWriter, r *http.Request)
 	// 現在のユーザー情報を取得
-	// (GET /users/me)
+	// (GET /api/v1/api/v1/users/me)
 	GetMe(w http.ResponseWriter, r *http.Request)
 	// 現在のユーザー情報を更新
-	// (PUT /users/me)
+	// (PUT /api/v1/api/v1/users/me)
 	UpdateMe(w http.ResponseWriter, r *http.Request)
+	// 著者一覧を取得
+	// (GET /api/v1/authors)
+	ListAuthors(w http.ResponseWriter, r *http.Request)
+	// 著者を新規作成
+	// (POST /api/v1/authors)
+	CreateAuthor(w http.ResponseWriter, r *http.Request)
+	// 著者を名前で検索
+	// (GET /api/v1/authors/search)
+	SearchAuthors(w http.ResponseWriter, r *http.Request, params SearchAuthorsParams)
+	// 著者情報を取得
+	// (GET /api/v1/authors/{id})
+	GetAuthorById(w http.ResponseWriter, r *http.Request, id int64)
+	// マスターブック一覧を取得
+	// (GET /api/v1/master-books)
+	ListMasterBooks(w http.ResponseWriter, r *http.Request)
+	// マスターブックを新規作成
+	// (POST /api/v1/master-books)
+	CreateMasterBook(w http.ResponseWriter, r *http.Request)
+	// マスターブックをタイトルで検索
+	// (GET /api/v1/master-books/search)
+	SearchMasterBooks(w http.ResponseWriter, r *http.Request, params SearchMasterBooksParams)
+	// マスターブック情報を取得
+	// (GET /api/v1/master-books/{id})
+	GetMasterBookById(w http.ResponseWriter, r *http.Request, id int64)
+	// マスターブック情報を更新
+	// (PUT /api/v1/master-books/{id})
+	UpdateMasterBook(w http.ResponseWriter, r *http.Request, id int64)
+	// 出版社一覧を取得
+	// (GET /api/v1/publishers)
+	ListPublishers(w http.ResponseWriter, r *http.Request)
+	// 出版社を新規作成
+	// (POST /api/v1/publishers)
+	CreatePublisher(w http.ResponseWriter, r *http.Request)
+	// 出版社を名前で検索
+	// (GET /api/v1/publishers/search)
+	SearchPublishers(w http.ResponseWriter, r *http.Request, params SearchPublishersParams)
+	// 出版社情報を取得
+	// (GET /api/v1/publishers/{id})
+	GetPublisherById(w http.ResponseWriter, r *http.Request, id int64)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
 
 type Unimplemented struct{}
 
-// 著者一覧を取得
-// (GET /authors)
-func (_ Unimplemented) GetAuthors(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// 著者を新規作成
-// (POST /authors)
-func (_ Unimplemented) CreateAuthor(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// 著者を名前で検索
-// (GET /authors/search)
-func (_ Unimplemented) SearchAuthors(w http.ResponseWriter, r *http.Request, params SearchAuthorsParams) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// 著者情報を取得
-// (GET /authors/{id})
-func (_ Unimplemented) GetAuthorById(w http.ResponseWriter, r *http.Request, id int64) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// 出版社一覧を取得
-// (GET /publishers)
-func (_ Unimplemented) GetPublishers(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// 出版社を新規作成
-// (POST /publishers)
-func (_ Unimplemented) CreatePublisher(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// 出版社を名前で検索
-// (GET /publishers/search)
-func (_ Unimplemented) SearchPublishers(w http.ResponseWriter, r *http.Request, params SearchPublishersParams) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// 出版社情報を取得
-// (GET /publishers/{id})
-func (_ Unimplemented) GetPublisherById(w http.ResponseWriter, r *http.Request, id int64) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
 // 現在のユーザーアカウントを削除
-// (DELETE /users/me)
+// (DELETE /api/v1/api/v1/users/me)
 func (_ Unimplemented) DeleteMe(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // 現在のユーザー情報を取得
-// (GET /users/me)
+// (GET /api/v1/api/v1/users/me)
 func (_ Unimplemented) GetMe(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // 現在のユーザー情報を更新
-// (PUT /users/me)
+// (PUT /api/v1/api/v1/users/me)
 func (_ Unimplemented) UpdateMe(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// 著者一覧を取得
+// (GET /api/v1/authors)
+func (_ Unimplemented) ListAuthors(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// 著者を新規作成
+// (POST /api/v1/authors)
+func (_ Unimplemented) CreateAuthor(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// 著者を名前で検索
+// (GET /api/v1/authors/search)
+func (_ Unimplemented) SearchAuthors(w http.ResponseWriter, r *http.Request, params SearchAuthorsParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// 著者情報を取得
+// (GET /api/v1/authors/{id})
+func (_ Unimplemented) GetAuthorById(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// マスターブック一覧を取得
+// (GET /api/v1/master-books)
+func (_ Unimplemented) ListMasterBooks(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// マスターブックを新規作成
+// (POST /api/v1/master-books)
+func (_ Unimplemented) CreateMasterBook(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// マスターブックをタイトルで検索
+// (GET /api/v1/master-books/search)
+func (_ Unimplemented) SearchMasterBooks(w http.ResponseWriter, r *http.Request, params SearchMasterBooksParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// マスターブック情報を取得
+// (GET /api/v1/master-books/{id})
+func (_ Unimplemented) GetMasterBookById(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// マスターブック情報を更新
+// (PUT /api/v1/master-books/{id})
+func (_ Unimplemented) UpdateMasterBook(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// 出版社一覧を取得
+// (GET /api/v1/publishers)
+func (_ Unimplemented) ListPublishers(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// 出版社を新規作成
+// (POST /api/v1/publishers)
+func (_ Unimplemented) CreatePublisher(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// 出版社を名前で検索
+// (GET /api/v1/publishers/search)
+func (_ Unimplemented) SearchPublishers(w http.ResponseWriter, r *http.Request, params SearchPublishersParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// 出版社情報を取得
+// (GET /api/v1/publishers/{id})
+func (_ Unimplemented) GetPublisherById(w http.ResponseWriter, r *http.Request, id int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -251,8 +396,8 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(http.Handler) http.Handler
 
-// GetAuthors operation middleware
-func (siw *ServerInterfaceWrapper) GetAuthors(w http.ResponseWriter, r *http.Request) {
+// DeleteMe operation middleware
+func (siw *ServerInterfaceWrapper) DeleteMe(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
@@ -261,7 +406,67 @@ func (siw *ServerInterfaceWrapper) GetAuthors(w http.ResponseWriter, r *http.Req
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetAuthors(w, r)
+		siw.Handler.DeleteMe(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetMe operation middleware
+func (siw *ServerInterfaceWrapper) GetMe(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetMe(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateMe operation middleware
+func (siw *ServerInterfaceWrapper) UpdateMe(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateMe(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListAuthors operation middleware
+func (siw *ServerInterfaceWrapper) ListAuthors(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListAuthors(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -362,8 +567,8 @@ func (siw *ServerInterfaceWrapper) GetAuthorById(w http.ResponseWriter, r *http.
 	handler.ServeHTTP(w, r)
 }
 
-// GetPublishers operation middleware
-func (siw *ServerInterfaceWrapper) GetPublishers(w http.ResponseWriter, r *http.Request) {
+// ListMasterBooks operation middleware
+func (siw *ServerInterfaceWrapper) ListMasterBooks(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
@@ -372,7 +577,149 @@ func (siw *ServerInterfaceWrapper) GetPublishers(w http.ResponseWriter, r *http.
 	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetPublishers(w, r)
+		siw.Handler.ListMasterBooks(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateMasterBook operation middleware
+func (siw *ServerInterfaceWrapper) CreateMasterBook(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateMasterBook(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SearchMasterBooks operation middleware
+func (siw *ServerInterfaceWrapper) SearchMasterBooks(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params SearchMasterBooksParams
+
+	// ------------- Required query parameter "title" -------------
+
+	if paramValue := r.URL.Query().Get("title"); paramValue != "" {
+
+	} else {
+		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "title"})
+		return
+	}
+
+	err = runtime.BindQueryParameter("form", true, true, "title", r.URL.Query(), &params.Title)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "title", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SearchMasterBooks(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetMasterBookById operation middleware
+func (siw *ServerInterfaceWrapper) GetMasterBookById(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetMasterBookById(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateMasterBook operation middleware
+func (siw *ServerInterfaceWrapper) UpdateMasterBook(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", chi.URLParam(r, "id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateMasterBook(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListPublishers operation middleware
+func (siw *ServerInterfaceWrapper) ListPublishers(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListPublishers(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -464,66 +811,6 @@ func (siw *ServerInterfaceWrapper) GetPublisherById(w http.ResponseWriter, r *ht
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetPublisherById(w, r, id)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// DeleteMe operation middleware
-func (siw *ServerInterfaceWrapper) DeleteMe(w http.ResponseWriter, r *http.Request) {
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteMe(w, r)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// GetMe operation middleware
-func (siw *ServerInterfaceWrapper) GetMe(w http.ResponseWriter, r *http.Request) {
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetMe(w, r)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// UpdateMe operation middleware
-func (siw *ServerInterfaceWrapper) UpdateMe(w http.ResponseWriter, r *http.Request) {
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.UpdateMe(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -647,390 +934,65 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/authors", wrapper.GetAuthors)
+		r.Delete(options.BaseURL+"/api/v1/api/v1/users/me", wrapper.DeleteMe)
 	})
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/authors", wrapper.CreateAuthor)
+		r.Get(options.BaseURL+"/api/v1/api/v1/users/me", wrapper.GetMe)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/authors/search", wrapper.SearchAuthors)
+		r.Put(options.BaseURL+"/api/v1/api/v1/users/me", wrapper.UpdateMe)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/authors/{id}", wrapper.GetAuthorById)
+		r.Get(options.BaseURL+"/api/v1/authors", wrapper.ListAuthors)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/publishers", wrapper.GetPublishers)
+		r.Post(options.BaseURL+"/api/v1/authors", wrapper.CreateAuthor)
 	})
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/publishers", wrapper.CreatePublisher)
+		r.Get(options.BaseURL+"/api/v1/authors/search", wrapper.SearchAuthors)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/publishers/search", wrapper.SearchPublishers)
+		r.Get(options.BaseURL+"/api/v1/authors/{id}", wrapper.GetAuthorById)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/publishers/{id}", wrapper.GetPublisherById)
+		r.Get(options.BaseURL+"/api/v1/master-books", wrapper.ListMasterBooks)
 	})
 	r.Group(func(r chi.Router) {
-		r.Delete(options.BaseURL+"/users/me", wrapper.DeleteMe)
+		r.Post(options.BaseURL+"/api/v1/master-books", wrapper.CreateMasterBook)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/users/me", wrapper.GetMe)
+		r.Get(options.BaseURL+"/api/v1/master-books/search", wrapper.SearchMasterBooks)
 	})
 	r.Group(func(r chi.Router) {
-		r.Put(options.BaseURL+"/users/me", wrapper.UpdateMe)
+		r.Get(options.BaseURL+"/api/v1/master-books/{id}", wrapper.GetMasterBookById)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/api/v1/master-books/{id}", wrapper.UpdateMasterBook)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/api/v1/publishers", wrapper.ListPublishers)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/api/v1/publishers", wrapper.CreatePublisher)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/api/v1/publishers/search", wrapper.SearchPublishers)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/api/v1/publishers/{id}", wrapper.GetPublisherById)
 	})
 
 	return r
 }
 
-type BadRequestJSONResponse ErrorResponse
+type BadRequestJSONResponse Error
 
-type InternalServerErrorJSONResponse ErrorResponse
+type InternalServerErrorJSONResponse Error
 
 type NotFoundResponse struct {
 }
 
 type UnauthorizedResponse struct {
-}
-
-type GetAuthorsRequestObject struct {
-}
-
-type GetAuthorsResponseObject interface {
-	VisitGetAuthorsResponse(w http.ResponseWriter) error
-}
-
-type GetAuthors200JSONResponse struct {
-	Authors []Author `json:"authors"`
-}
-
-func (response GetAuthors200JSONResponse) VisitGetAuthorsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetAuthors401Response = UnauthorizedResponse
-
-func (response GetAuthors401Response) VisitGetAuthorsResponse(w http.ResponseWriter) error {
-	w.WriteHeader(401)
-	return nil
-}
-
-type GetAuthors500JSONResponse struct {
-	InternalServerErrorJSONResponse
-}
-
-func (response GetAuthors500JSONResponse) VisitGetAuthorsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type CreateAuthorRequestObject struct {
-	Body *CreateAuthorJSONRequestBody
-}
-
-type CreateAuthorResponseObject interface {
-	VisitCreateAuthorResponse(w http.ResponseWriter) error
-}
-
-type CreateAuthor201JSONResponse AuthorResponse
-
-func (response CreateAuthor201JSONResponse) VisitCreateAuthorResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(201)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type CreateAuthor400JSONResponse struct{ BadRequestJSONResponse }
-
-func (response CreateAuthor400JSONResponse) VisitCreateAuthorResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type CreateAuthor401Response = UnauthorizedResponse
-
-func (response CreateAuthor401Response) VisitCreateAuthorResponse(w http.ResponseWriter) error {
-	w.WriteHeader(401)
-	return nil
-}
-
-type CreateAuthor409JSONResponse ErrorResponse
-
-func (response CreateAuthor409JSONResponse) VisitCreateAuthorResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(409)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type CreateAuthor500JSONResponse struct {
-	InternalServerErrorJSONResponse
-}
-
-func (response CreateAuthor500JSONResponse) VisitCreateAuthorResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type SearchAuthorsRequestObject struct {
-	Params SearchAuthorsParams
-}
-
-type SearchAuthorsResponseObject interface {
-	VisitSearchAuthorsResponse(w http.ResponseWriter) error
-}
-
-type SearchAuthors200JSONResponse struct {
-	Authors []Author `json:"authors"`
-}
-
-func (response SearchAuthors200JSONResponse) VisitSearchAuthorsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type SearchAuthors400JSONResponse struct{ BadRequestJSONResponse }
-
-func (response SearchAuthors400JSONResponse) VisitSearchAuthorsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type SearchAuthors401Response = UnauthorizedResponse
-
-func (response SearchAuthors401Response) VisitSearchAuthorsResponse(w http.ResponseWriter) error {
-	w.WriteHeader(401)
-	return nil
-}
-
-type SearchAuthors500JSONResponse struct {
-	InternalServerErrorJSONResponse
-}
-
-func (response SearchAuthors500JSONResponse) VisitSearchAuthorsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetAuthorByIdRequestObject struct {
-	Id int64 `json:"id"`
-}
-
-type GetAuthorByIdResponseObject interface {
-	VisitGetAuthorByIdResponse(w http.ResponseWriter) error
-}
-
-type GetAuthorById200JSONResponse AuthorResponse
-
-func (response GetAuthorById200JSONResponse) VisitGetAuthorByIdResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetAuthorById404Response = NotFoundResponse
-
-func (response GetAuthorById404Response) VisitGetAuthorByIdResponse(w http.ResponseWriter) error {
-	w.WriteHeader(404)
-	return nil
-}
-
-type GetAuthorById500JSONResponse struct {
-	InternalServerErrorJSONResponse
-}
-
-func (response GetAuthorById500JSONResponse) VisitGetAuthorByIdResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetPublishersRequestObject struct {
-}
-
-type GetPublishersResponseObject interface {
-	VisitGetPublishersResponse(w http.ResponseWriter) error
-}
-
-type GetPublishers200JSONResponse struct {
-	Publishers []Publisher `json:"publishers"`
-}
-
-func (response GetPublishers200JSONResponse) VisitGetPublishersResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetPublishers401Response = UnauthorizedResponse
-
-func (response GetPublishers401Response) VisitGetPublishersResponse(w http.ResponseWriter) error {
-	w.WriteHeader(401)
-	return nil
-}
-
-type GetPublishers500JSONResponse struct {
-	InternalServerErrorJSONResponse
-}
-
-func (response GetPublishers500JSONResponse) VisitGetPublishersResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type CreatePublisherRequestObject struct {
-	Body *CreatePublisherJSONRequestBody
-}
-
-type CreatePublisherResponseObject interface {
-	VisitCreatePublisherResponse(w http.ResponseWriter) error
-}
-
-type CreatePublisher201JSONResponse PublisherResponse
-
-func (response CreatePublisher201JSONResponse) VisitCreatePublisherResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(201)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type CreatePublisher400JSONResponse struct{ BadRequestJSONResponse }
-
-func (response CreatePublisher400JSONResponse) VisitCreatePublisherResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type CreatePublisher401Response = UnauthorizedResponse
-
-func (response CreatePublisher401Response) VisitCreatePublisherResponse(w http.ResponseWriter) error {
-	w.WriteHeader(401)
-	return nil
-}
-
-type CreatePublisher409JSONResponse ErrorResponse
-
-func (response CreatePublisher409JSONResponse) VisitCreatePublisherResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(409)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type CreatePublisher500JSONResponse struct {
-	InternalServerErrorJSONResponse
-}
-
-func (response CreatePublisher500JSONResponse) VisitCreatePublisherResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type SearchPublishersRequestObject struct {
-	Params SearchPublishersParams
-}
-
-type SearchPublishersResponseObject interface {
-	VisitSearchPublishersResponse(w http.ResponseWriter) error
-}
-
-type SearchPublishers200JSONResponse struct {
-	Publishers []Publisher `json:"publishers"`
-}
-
-func (response SearchPublishers200JSONResponse) VisitSearchPublishersResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type SearchPublishers400JSONResponse struct{ BadRequestJSONResponse }
-
-func (response SearchPublishers400JSONResponse) VisitSearchPublishersResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type SearchPublishers401Response = UnauthorizedResponse
-
-func (response SearchPublishers401Response) VisitSearchPublishersResponse(w http.ResponseWriter) error {
-	w.WriteHeader(401)
-	return nil
-}
-
-type SearchPublishers500JSONResponse struct {
-	InternalServerErrorJSONResponse
-}
-
-func (response SearchPublishers500JSONResponse) VisitSearchPublishersResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetPublisherByIdRequestObject struct {
-	Id int64 `json:"id"`
-}
-
-type GetPublisherByIdResponseObject interface {
-	VisitGetPublisherByIdResponse(w http.ResponseWriter) error
-}
-
-type GetPublisherById200JSONResponse PublisherResponse
-
-func (response GetPublisherById200JSONResponse) VisitGetPublisherByIdResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetPublisherById404Response = NotFoundResponse
-
-func (response GetPublisherById404Response) VisitGetPublisherByIdResponse(w http.ResponseWriter) error {
-	w.WriteHeader(404)
-	return nil
-}
-
-type GetPublisherById500JSONResponse struct {
-	InternalServerErrorJSONResponse
-}
-
-func (response GetPublisherById500JSONResponse) VisitGetPublisherByIdResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
 }
 
 type DeleteMeRequestObject struct {
@@ -1124,34 +1086,442 @@ func (response UpdateMe200JSONResponse) VisitUpdateMeResponse(w http.ResponseWri
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateMe400JSONResponse struct{ BadRequestJSONResponse }
+type UpdateMedefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
+}
 
-func (response UpdateMe400JSONResponse) VisitUpdateMeResponse(w http.ResponseWriter) error {
+func (response UpdateMedefaultJSONResponse) VisitUpdateMeResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type ListAuthorsRequestObject struct {
+}
+
+type ListAuthorsResponseObject interface {
+	VisitListAuthorsResponse(w http.ResponseWriter) error
+}
+
+type ListAuthors200JSONResponse struct {
+	Authors []Author `json:"authors"`
+}
+
+func (response ListAuthors200JSONResponse) VisitListAuthorsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type UpdateMe401Response = UnauthorizedResponse
+type ListAuthors401Response = UnauthorizedResponse
 
-func (response UpdateMe401Response) VisitUpdateMeResponse(w http.ResponseWriter) error {
+func (response ListAuthors401Response) VisitListAuthorsResponse(w http.ResponseWriter) error {
 	w.WriteHeader(401)
 	return nil
 }
 
-type UpdateMe404Response = NotFoundResponse
+type ListAuthors500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
 
-func (response UpdateMe404Response) VisitUpdateMeResponse(w http.ResponseWriter) error {
+func (response ListAuthors500JSONResponse) VisitListAuthorsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateAuthorRequestObject struct {
+	Body *CreateAuthorJSONRequestBody
+}
+
+type CreateAuthorResponseObject interface {
+	VisitCreateAuthorResponse(w http.ResponseWriter) error
+}
+
+type CreateAuthor201JSONResponse AuthorResponse
+
+func (response CreateAuthor201JSONResponse) VisitCreateAuthorResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateAuthordefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
+}
+
+func (response CreateAuthordefaultJSONResponse) VisitCreateAuthorResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type SearchAuthorsRequestObject struct {
+	Params SearchAuthorsParams
+}
+
+type SearchAuthorsResponseObject interface {
+	VisitSearchAuthorsResponse(w http.ResponseWriter) error
+}
+
+type SearchAuthors200JSONResponse struct {
+	Authors []Author `json:"authors"`
+}
+
+func (response SearchAuthors200JSONResponse) VisitSearchAuthorsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type SearchAuthorsdefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
+}
+
+func (response SearchAuthorsdefaultJSONResponse) VisitSearchAuthorsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type GetAuthorByIdRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type GetAuthorByIdResponseObject interface {
+	VisitGetAuthorByIdResponse(w http.ResponseWriter) error
+}
+
+type GetAuthorById200JSONResponse AuthorResponse
+
+func (response GetAuthorById200JSONResponse) VisitGetAuthorByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetAuthorById404Response = NotFoundResponse
+
+func (response GetAuthorById404Response) VisitGetAuthorByIdResponse(w http.ResponseWriter) error {
 	w.WriteHeader(404)
 	return nil
 }
 
-type UpdateMe500JSONResponse struct {
+type GetAuthorById500JSONResponse struct {
 	InternalServerErrorJSONResponse
 }
 
-func (response UpdateMe500JSONResponse) VisitUpdateMeResponse(w http.ResponseWriter) error {
+func (response GetAuthorById500JSONResponse) VisitGetAuthorByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListMasterBooksRequestObject struct {
+}
+
+type ListMasterBooksResponseObject interface {
+	VisitListMasterBooksResponse(w http.ResponseWriter) error
+}
+
+type ListMasterBooks200JSONResponse struct {
+	Books []MasterBook `json:"books"`
+}
+
+func (response ListMasterBooks200JSONResponse) VisitListMasterBooksResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListMasterBooks401Response = UnauthorizedResponse
+
+func (response ListMasterBooks401Response) VisitListMasterBooksResponse(w http.ResponseWriter) error {
+	w.WriteHeader(401)
+	return nil
+}
+
+type ListMasterBooks500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response ListMasterBooks500JSONResponse) VisitListMasterBooksResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateMasterBookRequestObject struct {
+	Body *CreateMasterBookJSONRequestBody
+}
+
+type CreateMasterBookResponseObject interface {
+	VisitCreateMasterBookResponse(w http.ResponseWriter) error
+}
+
+type CreateMasterBook201JSONResponse MasterBookResponse
+
+func (response CreateMasterBook201JSONResponse) VisitCreateMasterBookResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateMasterBookdefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
+}
+
+func (response CreateMasterBookdefaultJSONResponse) VisitCreateMasterBookResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type SearchMasterBooksRequestObject struct {
+	Params SearchMasterBooksParams
+}
+
+type SearchMasterBooksResponseObject interface {
+	VisitSearchMasterBooksResponse(w http.ResponseWriter) error
+}
+
+type SearchMasterBooks200JSONResponse struct {
+	Books []MasterBook `json:"books"`
+}
+
+func (response SearchMasterBooks200JSONResponse) VisitSearchMasterBooksResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type SearchMasterBooksdefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
+}
+
+func (response SearchMasterBooksdefaultJSONResponse) VisitSearchMasterBooksResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type GetMasterBookByIdRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type GetMasterBookByIdResponseObject interface {
+	VisitGetMasterBookByIdResponse(w http.ResponseWriter) error
+}
+
+type GetMasterBookById200JSONResponse MasterBookResponse
+
+func (response GetMasterBookById200JSONResponse) VisitGetMasterBookByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMasterBookById401Response = UnauthorizedResponse
+
+func (response GetMasterBookById401Response) VisitGetMasterBookByIdResponse(w http.ResponseWriter) error {
+	w.WriteHeader(401)
+	return nil
+}
+
+type GetMasterBookById404Response = NotFoundResponse
+
+func (response GetMasterBookById404Response) VisitGetMasterBookByIdResponse(w http.ResponseWriter) error {
+	w.WriteHeader(404)
+	return nil
+}
+
+type GetMasterBookById500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response GetMasterBookById500JSONResponse) VisitGetMasterBookByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateMasterBookRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *UpdateMasterBookJSONRequestBody
+}
+
+type UpdateMasterBookResponseObject interface {
+	VisitUpdateMasterBookResponse(w http.ResponseWriter) error
+}
+
+type UpdateMasterBook200JSONResponse MasterBookResponse
+
+func (response UpdateMasterBook200JSONResponse) VisitUpdateMasterBookResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateMasterBookdefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
+}
+
+func (response UpdateMasterBookdefaultJSONResponse) VisitUpdateMasterBookResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type ListPublishersRequestObject struct {
+}
+
+type ListPublishersResponseObject interface {
+	VisitListPublishersResponse(w http.ResponseWriter) error
+}
+
+type ListPublishers200JSONResponse struct {
+	Publishers []Publisher `json:"publishers"`
+}
+
+func (response ListPublishers200JSONResponse) VisitListPublishersResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListPublishers401Response = UnauthorizedResponse
+
+func (response ListPublishers401Response) VisitListPublishersResponse(w http.ResponseWriter) error {
+	w.WriteHeader(401)
+	return nil
+}
+
+type ListPublishers500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response ListPublishers500JSONResponse) VisitListPublishersResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreatePublisherRequestObject struct {
+	Body *CreatePublisherJSONRequestBody
+}
+
+type CreatePublisherResponseObject interface {
+	VisitCreatePublisherResponse(w http.ResponseWriter) error
+}
+
+type CreatePublisher201JSONResponse PublisherResponse
+
+func (response CreatePublisher201JSONResponse) VisitCreatePublisherResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreatePublisherdefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
+}
+
+func (response CreatePublisherdefaultJSONResponse) VisitCreatePublisherResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type SearchPublishersRequestObject struct {
+	Params SearchPublishersParams
+}
+
+type SearchPublishersResponseObject interface {
+	VisitSearchPublishersResponse(w http.ResponseWriter) error
+}
+
+type SearchPublishers200JSONResponse struct {
+	Publishers []Publisher `json:"publishers"`
+}
+
+func (response SearchPublishers200JSONResponse) VisitSearchPublishersResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type SearchPublishersdefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
+}
+
+func (response SearchPublishersdefaultJSONResponse) VisitSearchPublishersResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type GetPublisherByIdRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type GetPublisherByIdResponseObject interface {
+	VisitGetPublisherByIdResponse(w http.ResponseWriter) error
+}
+
+type GetPublisherById200JSONResponse PublisherResponse
+
+func (response GetPublisherById200JSONResponse) VisitGetPublisherByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetPublisherById404Response = NotFoundResponse
+
+func (response GetPublisherById404Response) VisitGetPublisherByIdResponse(w http.ResponseWriter) error {
+	w.WriteHeader(404)
+	return nil
+}
+
+type GetPublisherById500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response GetPublisherById500JSONResponse) VisitGetPublisherByIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500)
 
@@ -1160,39 +1530,54 @@ func (response UpdateMe500JSONResponse) VisitUpdateMeResponse(w http.ResponseWri
 
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
-	// 著者一覧を取得
-	// (GET /authors)
-	GetAuthors(ctx context.Context, request GetAuthorsRequestObject) (GetAuthorsResponseObject, error)
-	// 著者を新規作成
-	// (POST /authors)
-	CreateAuthor(ctx context.Context, request CreateAuthorRequestObject) (CreateAuthorResponseObject, error)
-	// 著者を名前で検索
-	// (GET /authors/search)
-	SearchAuthors(ctx context.Context, request SearchAuthorsRequestObject) (SearchAuthorsResponseObject, error)
-	// 著者情報を取得
-	// (GET /authors/{id})
-	GetAuthorById(ctx context.Context, request GetAuthorByIdRequestObject) (GetAuthorByIdResponseObject, error)
-	// 出版社一覧を取得
-	// (GET /publishers)
-	GetPublishers(ctx context.Context, request GetPublishersRequestObject) (GetPublishersResponseObject, error)
-	// 出版社を新規作成
-	// (POST /publishers)
-	CreatePublisher(ctx context.Context, request CreatePublisherRequestObject) (CreatePublisherResponseObject, error)
-	// 出版社を名前で検索
-	// (GET /publishers/search)
-	SearchPublishers(ctx context.Context, request SearchPublishersRequestObject) (SearchPublishersResponseObject, error)
-	// 出版社情報を取得
-	// (GET /publishers/{id})
-	GetPublisherById(ctx context.Context, request GetPublisherByIdRequestObject) (GetPublisherByIdResponseObject, error)
 	// 現在のユーザーアカウントを削除
-	// (DELETE /users/me)
+	// (DELETE /api/v1/api/v1/users/me)
 	DeleteMe(ctx context.Context, request DeleteMeRequestObject) (DeleteMeResponseObject, error)
 	// 現在のユーザー情報を取得
-	// (GET /users/me)
+	// (GET /api/v1/api/v1/users/me)
 	GetMe(ctx context.Context, request GetMeRequestObject) (GetMeResponseObject, error)
 	// 現在のユーザー情報を更新
-	// (PUT /users/me)
+	// (PUT /api/v1/api/v1/users/me)
 	UpdateMe(ctx context.Context, request UpdateMeRequestObject) (UpdateMeResponseObject, error)
+	// 著者一覧を取得
+	// (GET /api/v1/authors)
+	ListAuthors(ctx context.Context, request ListAuthorsRequestObject) (ListAuthorsResponseObject, error)
+	// 著者を新規作成
+	// (POST /api/v1/authors)
+	CreateAuthor(ctx context.Context, request CreateAuthorRequestObject) (CreateAuthorResponseObject, error)
+	// 著者を名前で検索
+	// (GET /api/v1/authors/search)
+	SearchAuthors(ctx context.Context, request SearchAuthorsRequestObject) (SearchAuthorsResponseObject, error)
+	// 著者情報を取得
+	// (GET /api/v1/authors/{id})
+	GetAuthorById(ctx context.Context, request GetAuthorByIdRequestObject) (GetAuthorByIdResponseObject, error)
+	// マスターブック一覧を取得
+	// (GET /api/v1/master-books)
+	ListMasterBooks(ctx context.Context, request ListMasterBooksRequestObject) (ListMasterBooksResponseObject, error)
+	// マスターブックを新規作成
+	// (POST /api/v1/master-books)
+	CreateMasterBook(ctx context.Context, request CreateMasterBookRequestObject) (CreateMasterBookResponseObject, error)
+	// マスターブックをタイトルで検索
+	// (GET /api/v1/master-books/search)
+	SearchMasterBooks(ctx context.Context, request SearchMasterBooksRequestObject) (SearchMasterBooksResponseObject, error)
+	// マスターブック情報を取得
+	// (GET /api/v1/master-books/{id})
+	GetMasterBookById(ctx context.Context, request GetMasterBookByIdRequestObject) (GetMasterBookByIdResponseObject, error)
+	// マスターブック情報を更新
+	// (PUT /api/v1/master-books/{id})
+	UpdateMasterBook(ctx context.Context, request UpdateMasterBookRequestObject) (UpdateMasterBookResponseObject, error)
+	// 出版社一覧を取得
+	// (GET /api/v1/publishers)
+	ListPublishers(ctx context.Context, request ListPublishersRequestObject) (ListPublishersResponseObject, error)
+	// 出版社を新規作成
+	// (POST /api/v1/publishers)
+	CreatePublisher(ctx context.Context, request CreatePublisherRequestObject) (CreatePublisherResponseObject, error)
+	// 出版社を名前で検索
+	// (GET /api/v1/publishers/search)
+	SearchPublishers(ctx context.Context, request SearchPublishersRequestObject) (SearchPublishersResponseObject, error)
+	// 出版社情報を取得
+	// (GET /api/v1/publishers/{id})
+	GetPublisherById(ctx context.Context, request GetPublisherByIdRequestObject) (GetPublisherByIdResponseObject, error)
 }
 
 type StrictHandlerFunc = strictnethttp.StrictHTTPHandlerFunc
@@ -1224,23 +1609,102 @@ type strictHandler struct {
 	options     StrictHTTPServerOptions
 }
 
-// GetAuthors operation middleware
-func (sh *strictHandler) GetAuthors(w http.ResponseWriter, r *http.Request) {
-	var request GetAuthorsRequestObject
+// DeleteMe operation middleware
+func (sh *strictHandler) DeleteMe(w http.ResponseWriter, r *http.Request) {
+	var request DeleteMeRequestObject
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetAuthors(ctx, request.(GetAuthorsRequestObject))
+		return sh.ssi.DeleteMe(ctx, request.(DeleteMeRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetAuthors")
+		handler = middleware(handler, "DeleteMe")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetAuthorsResponseObject); ok {
-		if err := validResponse.VisitGetAuthorsResponse(w); err != nil {
+	} else if validResponse, ok := response.(DeleteMeResponseObject); ok {
+		if err := validResponse.VisitDeleteMeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetMe operation middleware
+func (sh *strictHandler) GetMe(w http.ResponseWriter, r *http.Request) {
+	var request GetMeRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetMe(ctx, request.(GetMeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetMe")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetMeResponseObject); ok {
+		if err := validResponse.VisitGetMeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateMe operation middleware
+func (sh *strictHandler) UpdateMe(w http.ResponseWriter, r *http.Request) {
+	var request UpdateMeRequestObject
+
+	var body UpdateMeJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateMe(ctx, request.(UpdateMeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateMe")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateMeResponseObject); ok {
+		if err := validResponse.VisitUpdateMeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListAuthors operation middleware
+func (sh *strictHandler) ListAuthors(w http.ResponseWriter, r *http.Request) {
+	var request ListAuthorsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListAuthors(ctx, request.(ListAuthorsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListAuthors")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListAuthorsResponseObject); ok {
+		if err := validResponse.VisitListAuthorsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -1331,23 +1795,163 @@ func (sh *strictHandler) GetAuthorById(w http.ResponseWriter, r *http.Request, i
 	}
 }
 
-// GetPublishers operation middleware
-func (sh *strictHandler) GetPublishers(w http.ResponseWriter, r *http.Request) {
-	var request GetPublishersRequestObject
+// ListMasterBooks operation middleware
+func (sh *strictHandler) ListMasterBooks(w http.ResponseWriter, r *http.Request) {
+	var request ListMasterBooksRequestObject
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetPublishers(ctx, request.(GetPublishersRequestObject))
+		return sh.ssi.ListMasterBooks(ctx, request.(ListMasterBooksRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetPublishers")
+		handler = middleware(handler, "ListMasterBooks")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetPublishersResponseObject); ok {
-		if err := validResponse.VisitGetPublishersResponse(w); err != nil {
+	} else if validResponse, ok := response.(ListMasterBooksResponseObject); ok {
+		if err := validResponse.VisitListMasterBooksResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateMasterBook operation middleware
+func (sh *strictHandler) CreateMasterBook(w http.ResponseWriter, r *http.Request) {
+	var request CreateMasterBookRequestObject
+
+	var body CreateMasterBookJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateMasterBook(ctx, request.(CreateMasterBookRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateMasterBook")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateMasterBookResponseObject); ok {
+		if err := validResponse.VisitCreateMasterBookResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// SearchMasterBooks operation middleware
+func (sh *strictHandler) SearchMasterBooks(w http.ResponseWriter, r *http.Request, params SearchMasterBooksParams) {
+	var request SearchMasterBooksRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.SearchMasterBooks(ctx, request.(SearchMasterBooksRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SearchMasterBooks")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(SearchMasterBooksResponseObject); ok {
+		if err := validResponse.VisitSearchMasterBooksResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetMasterBookById operation middleware
+func (sh *strictHandler) GetMasterBookById(w http.ResponseWriter, r *http.Request, id int64) {
+	var request GetMasterBookByIdRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetMasterBookById(ctx, request.(GetMasterBookByIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetMasterBookById")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetMasterBookByIdResponseObject); ok {
+		if err := validResponse.VisitGetMasterBookByIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateMasterBook operation middleware
+func (sh *strictHandler) UpdateMasterBook(w http.ResponseWriter, r *http.Request, id int64) {
+	var request UpdateMasterBookRequestObject
+
+	request.Id = id
+
+	var body UpdateMasterBookJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateMasterBook(ctx, request.(UpdateMasterBookRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateMasterBook")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateMasterBookResponseObject); ok {
+		if err := validResponse.VisitUpdateMasterBookResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListPublishers operation middleware
+func (sh *strictHandler) ListPublishers(w http.ResponseWriter, r *http.Request) {
+	var request ListPublishersRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListPublishers(ctx, request.(ListPublishersRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListPublishers")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListPublishersResponseObject); ok {
+		if err := validResponse.VisitListPublishersResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -1431,85 +2035,6 @@ func (sh *strictHandler) GetPublisherById(w http.ResponseWriter, r *http.Request
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetPublisherByIdResponseObject); ok {
 		if err := validResponse.VisitGetPublisherByIdResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// DeleteMe operation middleware
-func (sh *strictHandler) DeleteMe(w http.ResponseWriter, r *http.Request) {
-	var request DeleteMeRequestObject
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.DeleteMe(ctx, request.(DeleteMeRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "DeleteMe")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(DeleteMeResponseObject); ok {
-		if err := validResponse.VisitDeleteMeResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// GetMe operation middleware
-func (sh *strictHandler) GetMe(w http.ResponseWriter, r *http.Request) {
-	var request GetMeRequestObject
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetMe(ctx, request.(GetMeRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetMe")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetMeResponseObject); ok {
-		if err := validResponse.VisitGetMeResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// UpdateMe operation middleware
-func (sh *strictHandler) UpdateMe(w http.ResponseWriter, r *http.Request) {
-	var request UpdateMeRequestObject
-
-	var body UpdateMeJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.UpdateMe(ctx, request.(UpdateMeRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "UpdateMe")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(UpdateMeResponseObject); ok {
-		if err := validResponse.VisitUpdateMeResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
