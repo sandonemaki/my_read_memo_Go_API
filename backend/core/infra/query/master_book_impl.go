@@ -58,3 +58,13 @@ func (m *masterBook) Search(ctx context.Context, query query.MasterBookSearchQue
 	}
 	return masterBooks, nil
 }
+
+func (m *masterBook) GetByID(ctx context.Context, query query.MasterBookGetQuery, orFail bool) (*model.MasterBook, error) {
+	// TODO:実装
+	return nil, nil
+}
+
+func (m *masterBook) List(ctx context.Context) ([]*model.MasterBook, error) {
+	// TODO:実装
+	return nil, nil
+}
