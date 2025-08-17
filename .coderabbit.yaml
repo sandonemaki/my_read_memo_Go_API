@@ -17,3 +17,16 @@ review:
   summarize_release_notes: |
     このプルリクエストのリリースノートを日本語で簡潔にまとめてください。
     変更点を「新機能」「修正」「リファクタ」などのカテゴリごとに箇条書きで記載してください。
+path_instructions:
+  - path: "**/*.go"
+    instructions: |
+      Goのコードはベストプラクティスに沿ってレビューしてください。特にセキュリティ面、型安全性、不要なグローバル変数利用に注意してください。
+ignore_files:
+  - "**/pkg/dbmodels/**"           # Bob ORM生成ファイル
+  - "**/pkg/oapi/oapi_gen.go"      # wire_gen.go
+  - "**/*_gen.go"                  # Wire等の生成ファイル
+  - "**/*.bob.go"                  # Bob生成ファイル
+  - "**/*.bob_test.go"
+  - "**/mock/**"                   # GoMock生成ファイル
+  - "**/*_mock_test.go"            # モックテストファイル
+  - "**/*_gomock_test.go"          # GoMockテストファイル
