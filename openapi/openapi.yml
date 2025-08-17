@@ -7,7 +7,7 @@ security:
 servers:
   - url: https://sample.com
 paths:
-  /api/v1/api/v1/users/me:
+  /api/v1/users/me:
     get:
       tags:
         - users
