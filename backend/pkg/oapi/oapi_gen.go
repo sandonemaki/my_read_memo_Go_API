@@ -220,9 +220,6 @@ type SearchPublishersParams struct {
 	Name string `form:"name" json:"name"`
 }
 
-// UpdateMeJSONRequestBody defines body for UpdateMe for application/json ContentType.
-type UpdateMeJSONRequestBody = UpdateUser
-
 // CreateAuthorJSONRequestBody defines body for CreateAuthor for application/json ContentType.
 type CreateAuthorJSONRequestBody = CreateAuthor
 
@@ -235,17 +232,11 @@ type UpdateMasterBookJSONRequestBody = UpdateMasterBook
 // CreatePublisherJSONRequestBody defines body for CreatePublisher for application/json ContentType.
 type CreatePublisherJSONRequestBody = CreatePublisher
 
+// UpdateMeJSONRequestBody defines body for UpdateMe for application/json ContentType.
+type UpdateMeJSONRequestBody = UpdateUser
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// 現在のユーザーアカウントを削除
-	// (DELETE /api/v1/api/v1/users/me)
-	DeleteMe(w http.ResponseWriter, r *http.Request)
-	// 現在のユーザー情報を取得
-	// (GET /api/v1/api/v1/users/me)
-	GetMe(w http.ResponseWriter, r *http.Request)
-	// 現在のユーザー情報を更新
-	// (PUT /api/v1/api/v1/users/me)
-	UpdateMe(w http.ResponseWriter, r *http.Request)
 	// 著者一覧を取得
 	// (GET /api/v1/authors)
 	ListAuthors(w http.ResponseWriter, r *http.Request)
@@ -285,29 +276,20 @@ type ServerInterface interface {
 	// 出版社情報を取得
 	// (GET /api/v1/publishers/{id})
 	GetPublisherById(w http.ResponseWriter, r *http.Request, id int64)
+	// 現在のユーザーアカウントを削除
+	// (DELETE /api/v1/users/me)
+	DeleteMe(w http.ResponseWriter, r *http.Request)
+	// 現在のユーザー情報を取得
+	// (GET /api/v1/users/me)
+	GetMe(w http.ResponseWriter, r *http.Request)
+	// 現在のユーザー情報を更新
+	// (PUT /api/v1/users/me)
+	UpdateMe(w http.ResponseWriter, r *http.Request)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
 
 type Unimplemented struct{}
-
-// 現在のユーザーアカウントを削除
-// (DELETE /api/v1/api/v1/users/me)
-func (_ Unimplemented) DeleteMe(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// 現在のユーザー情報を取得
-// (GET /api/v1/api/v1/users/me)
-func (_ Unimplemented) GetMe(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// 現在のユーザー情報を更新
-// (PUT /api/v1/api/v1/users/me)
-func (_ Unimplemented) UpdateMe(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
 
 // 著者一覧を取得
 // (GET /api/v1/authors)
@@ -387,6 +369,24 @@ func (_ Unimplemented) GetPublisherById(w http.ResponseWriter, r *http.Request, 
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// 現在のユーザーアカウントを削除
+// (DELETE /api/v1/users/me)
+func (_ Unimplemented) DeleteMe(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// 現在のユーザー情報を取得
+// (GET /api/v1/users/me)
+func (_ Unimplemented) GetMe(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// 現在のユーザー情報を更新
+// (PUT /api/v1/users/me)
+func (_ Unimplemented) UpdateMe(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // ServerInterfaceWrapper converts contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler            ServerInterface
@@ -395,66 +395,6 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.Handler) http.Handler
-
-// DeleteMe operation middleware
-func (siw *ServerInterfaceWrapper) DeleteMe(w http.ResponseWriter, r *http.Request) {
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.DeleteMe(w, r)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// GetMe operation middleware
-func (siw *ServerInterfaceWrapper) GetMe(w http.ResponseWriter, r *http.Request) {
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetMe(w, r)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
-// UpdateMe operation middleware
-func (siw *ServerInterfaceWrapper) UpdateMe(w http.ResponseWriter, r *http.Request) {
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.UpdateMe(w, r)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
 
 // ListAuthors operation middleware
 func (siw *ServerInterfaceWrapper) ListAuthors(w http.ResponseWriter, r *http.Request) {
@@ -820,6 +760,66 @@ func (siw *ServerInterfaceWrapper) GetPublisherById(w http.ResponseWriter, r *ht
 	handler.ServeHTTP(w, r)
 }
 
+// DeleteMe operation middleware
+func (siw *ServerInterfaceWrapper) DeleteMe(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteMe(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetMe operation middleware
+func (siw *ServerInterfaceWrapper) GetMe(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetMe(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateMe operation middleware
+func (siw *ServerInterfaceWrapper) UpdateMe(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateMe(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 type UnescapedCookieParamError struct {
 	ParamName string
 	Err       error
@@ -934,15 +934,6 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
-		r.Delete(options.BaseURL+"/api/v1/api/v1/users/me", wrapper.DeleteMe)
-	})
-	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/api/v1/api/v1/users/me", wrapper.GetMe)
-	})
-	r.Group(func(r chi.Router) {
-		r.Put(options.BaseURL+"/api/v1/api/v1/users/me", wrapper.UpdateMe)
-	})
-	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/api/v1/authors", wrapper.ListAuthors)
 	})
 	r.Group(func(r chi.Router) {
@@ -981,6 +972,15 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/api/v1/publishers/{id}", wrapper.GetPublisherById)
 	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/api/v1/users/me", wrapper.DeleteMe)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/api/v1/users/me", wrapper.GetMe)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/api/v1/users/me", wrapper.UpdateMe)
+	})
 
 	return r
 }
@@ -993,109 +993,6 @@ type NotFoundResponse struct {
 }
 
 type UnauthorizedResponse struct {
-}
-
-type DeleteMeRequestObject struct {
-}
-
-type DeleteMeResponseObject interface {
-	VisitDeleteMeResponse(w http.ResponseWriter) error
-}
-
-type DeleteMe204Response struct {
-}
-
-func (response DeleteMe204Response) VisitDeleteMeResponse(w http.ResponseWriter) error {
-	w.WriteHeader(204)
-	return nil
-}
-
-type DeleteMe401Response = UnauthorizedResponse
-
-func (response DeleteMe401Response) VisitDeleteMeResponse(w http.ResponseWriter) error {
-	w.WriteHeader(401)
-	return nil
-}
-
-type DeleteMe404Response = NotFoundResponse
-
-func (response DeleteMe404Response) VisitDeleteMeResponse(w http.ResponseWriter) error {
-	w.WriteHeader(404)
-	return nil
-}
-
-type DeleteMe500JSONResponse struct {
-	InternalServerErrorJSONResponse
-}
-
-func (response DeleteMe500JSONResponse) VisitDeleteMeResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetMeRequestObject struct {
-}
-
-type GetMeResponseObject interface {
-	VisitGetMeResponse(w http.ResponseWriter) error
-}
-
-type GetMe200JSONResponse UserResponse
-
-func (response GetMe200JSONResponse) VisitGetMeResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetMe401Response = UnauthorizedResponse
-
-func (response GetMe401Response) VisitGetMeResponse(w http.ResponseWriter) error {
-	w.WriteHeader(401)
-	return nil
-}
-
-type GetMe500JSONResponse struct {
-	InternalServerErrorJSONResponse
-}
-
-func (response GetMe500JSONResponse) VisitGetMeResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type UpdateMeRequestObject struct {
-	Body *UpdateMeJSONRequestBody
-}
-
-type UpdateMeResponseObject interface {
-	VisitUpdateMeResponse(w http.ResponseWriter) error
-}
-
-type UpdateMe200JSONResponse UserResponse
-
-func (response UpdateMe200JSONResponse) VisitUpdateMeResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type UpdateMedefaultJSONResponse struct {
-	Body       Error
-	StatusCode int
-}
-
-func (response UpdateMedefaultJSONResponse) VisitUpdateMeResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(response.StatusCode)
-
-	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type ListAuthorsRequestObject struct {
@@ -1528,17 +1425,111 @@ func (response GetPublisherById500JSONResponse) VisitGetPublisherByIdResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
+type DeleteMeRequestObject struct {
+}
+
+type DeleteMeResponseObject interface {
+	VisitDeleteMeResponse(w http.ResponseWriter) error
+}
+
+type DeleteMe204Response struct {
+}
+
+func (response DeleteMe204Response) VisitDeleteMeResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteMe401Response = UnauthorizedResponse
+
+func (response DeleteMe401Response) VisitDeleteMeResponse(w http.ResponseWriter) error {
+	w.WriteHeader(401)
+	return nil
+}
+
+type DeleteMe404Response = NotFoundResponse
+
+func (response DeleteMe404Response) VisitDeleteMeResponse(w http.ResponseWriter) error {
+	w.WriteHeader(404)
+	return nil
+}
+
+type DeleteMe500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response DeleteMe500JSONResponse) VisitDeleteMeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMeRequestObject struct {
+}
+
+type GetMeResponseObject interface {
+	VisitGetMeResponse(w http.ResponseWriter) error
+}
+
+type GetMe200JSONResponse UserResponse
+
+func (response GetMe200JSONResponse) VisitGetMeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMe401Response = UnauthorizedResponse
+
+func (response GetMe401Response) VisitGetMeResponse(w http.ResponseWriter) error {
+	w.WriteHeader(401)
+	return nil
+}
+
+type GetMe500JSONResponse struct {
+	InternalServerErrorJSONResponse
+}
+
+func (response GetMe500JSONResponse) VisitGetMeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateMeRequestObject struct {
+	Body *UpdateMeJSONRequestBody
+}
+
+type UpdateMeResponseObject interface {
+	VisitUpdateMeResponse(w http.ResponseWriter) error
+}
+
+type UpdateMe200JSONResponse UserResponse
+
+func (response UpdateMe200JSONResponse) VisitUpdateMeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateMedefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
+}
+
+func (response UpdateMedefaultJSONResponse) VisitUpdateMeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
-	// 現在のユーザーアカウントを削除
-	// (DELETE /api/v1/api/v1/users/me)
-	DeleteMe(ctx context.Context, request DeleteMeRequestObject) (DeleteMeResponseObject, error)
-	// 現在のユーザー情報を取得
-	// (GET /api/v1/api/v1/users/me)
-	GetMe(ctx context.Context, request GetMeRequestObject) (GetMeResponseObject, error)
-	// 現在のユーザー情報を更新
-	// (PUT /api/v1/api/v1/users/me)
-	UpdateMe(ctx context.Context, request UpdateMeRequestObject) (UpdateMeResponseObject, error)
 	// 著者一覧を取得
 	// (GET /api/v1/authors)
 	ListAuthors(ctx context.Context, request ListAuthorsRequestObject) (ListAuthorsResponseObject, error)
@@ -1578,6 +1569,15 @@ type StrictServerInterface interface {
 	// 出版社情報を取得
 	// (GET /api/v1/publishers/{id})
 	GetPublisherById(ctx context.Context, request GetPublisherByIdRequestObject) (GetPublisherByIdResponseObject, error)
+	// 現在のユーザーアカウントを削除
+	// (DELETE /api/v1/users/me)
+	DeleteMe(ctx context.Context, request DeleteMeRequestObject) (DeleteMeResponseObject, error)
+	// 現在のユーザー情報を取得
+	// (GET /api/v1/users/me)
+	GetMe(ctx context.Context, request GetMeRequestObject) (GetMeResponseObject, error)
+	// 現在のユーザー情報を更新
+	// (PUT /api/v1/users/me)
+	UpdateMe(ctx context.Context, request UpdateMeRequestObject) (UpdateMeResponseObject, error)
 }
 
 type StrictHandlerFunc = strictnethttp.StrictHTTPHandlerFunc
@@ -1607,85 +1607,6 @@ type strictHandler struct {
 	ssi         StrictServerInterface
 	middlewares []StrictMiddlewareFunc
 	options     StrictHTTPServerOptions
-}
-
-// DeleteMe operation middleware
-func (sh *strictHandler) DeleteMe(w http.ResponseWriter, r *http.Request) {
-	var request DeleteMeRequestObject
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.DeleteMe(ctx, request.(DeleteMeRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "DeleteMe")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(DeleteMeResponseObject); ok {
-		if err := validResponse.VisitDeleteMeResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// GetMe operation middleware
-func (sh *strictHandler) GetMe(w http.ResponseWriter, r *http.Request) {
-	var request GetMeRequestObject
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetMe(ctx, request.(GetMeRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetMe")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetMeResponseObject); ok {
-		if err := validResponse.VisitGetMeResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// UpdateMe operation middleware
-func (sh *strictHandler) UpdateMe(w http.ResponseWriter, r *http.Request) {
-	var request UpdateMeRequestObject
-
-	var body UpdateMeJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.UpdateMe(ctx, request.(UpdateMeRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "UpdateMe")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(UpdateMeResponseObject); ok {
-		if err := validResponse.VisitUpdateMeResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
 }
 
 // ListAuthors operation middleware
@@ -2035,6 +1956,85 @@ func (sh *strictHandler) GetPublisherById(w http.ResponseWriter, r *http.Request
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetPublisherByIdResponseObject); ok {
 		if err := validResponse.VisitGetPublisherByIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteMe operation middleware
+func (sh *strictHandler) DeleteMe(w http.ResponseWriter, r *http.Request) {
+	var request DeleteMeRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteMe(ctx, request.(DeleteMeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteMe")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteMeResponseObject); ok {
+		if err := validResponse.VisitDeleteMeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetMe operation middleware
+func (sh *strictHandler) GetMe(w http.ResponseWriter, r *http.Request) {
+	var request GetMeRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetMe(ctx, request.(GetMeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetMe")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetMeResponseObject); ok {
+		if err := validResponse.VisitGetMeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateMe operation middleware
+func (sh *strictHandler) UpdateMe(w http.ResponseWriter, r *http.Request) {
+	var request UpdateMeRequestObject
+
+	var body UpdateMeJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateMe(ctx, request.(UpdateMeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateMe")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateMeResponseObject); ok {
+		if err := validResponse.VisitUpdateMeResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
