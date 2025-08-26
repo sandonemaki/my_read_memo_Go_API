@@ -34,17 +34,17 @@ func NewPublisher(
 }
 
 // Create は新しい出版社を作成
-func (u *publisher) Create(ctx context.Context, in input.CreatePublisher) (*output.CreatePublisher, error) {
+func (u *publisher) Create(ctx context.Context, input input.CreatePublisher) (*output.CreatePublisher, error) {
 	// Step 1: 入力値の検証
 	// なぜ？：不正なデータがDBに入らないようにするため
-	if err := in.Validate(); err != nil {
+	if err := input.Validate(); err != nil {
 		return nil, err
 	}
 
 	// Step 2: ドメインモデルを作成
 	// なぜmodel.Publisher？：ビジネスロジックを表現する型
 	publisher := &model.Publisher{
-		Name: in.Name,
+		Name: input.Name,
 		// ID, CreatedAt, UpdatedAtはDB側で自動設定される
 	}
 
@@ -62,9 +62,9 @@ func (u *publisher) Create(ctx context.Context, in input.CreatePublisher) (*outp
 }
 
 // GetByID は指定されたIDの出版社を取得
-func (u *publisher) GetByID(ctx context.Context, in input.GetPublisherByID) (*output.GetPublisher, error) {
+func (u *publisher) GetByID(ctx context.Context, input input.GetPublisherByID) (*output.GetPublisher, error) {
 	// 入力値のバリデーション
-	if err := in.Validate(); err != nil {
+	if err := input.Validate(); err != nil {
 		return nil, err
 	}
 
@@ -72,7 +72,7 @@ func (u *publisher) GetByID(ctx context.Context, in input.GetPublisherByID) (*ou
 	// なぜquery？：データ取得はqueryの責任
 	// null.Int64From：null許容型に変換（DBのNULL対応）
 	publisher, err := u.publisherQuery.GetByID(ctx, query.PublisherGetQuery{
-		ID: null.Int64From(in.ID),
+		ID: null.Int64From(input.ID),
 	}, true) // orFail: trueは必須データ（見つからない場合エラー）
 	if err != nil {
 		return nil, err
