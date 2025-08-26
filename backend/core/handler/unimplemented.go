@@ -44,7 +44,7 @@ func (_ Unimplemented) GetAuthorById(ctx context.Context, request oapi.GetAuthor
 		StatusCode: 404,
 	}, nil
 }
-func (_ Unimplemented) GetAuthors(ctx context.Context, request oapi.ListAuthorsRequestObject) (oapi.ListAuthorsResponseObject, error) {
+func (_ Unimplemented) ListAuthors(ctx context.Context, request oapi.ListAuthorsRequestObject) (oapi.ListAuthorsResponseObject, error) {
 	return oapi.ListAuthorsdefaultJSONResponse{
 		Body:       adaptor.NewError((fmt.Errorf("unimplemented"))),
 		StatusCode: 404,
@@ -69,7 +69,7 @@ func (_ Unimplemented) GetPublisherById(ctx context.Context, request oapi.GetPub
 		StatusCode: 404,
 	}, nil
 }
-func (_ Unimplemented) GetPublishers(ctx context.Context, request oapi.ListPublishersRequestObject) (oapi.ListPublishersResponseObject, error) {
+func (_ Unimplemented) ListPublishers(ctx context.Context, request oapi.ListPublishersRequestObject) (oapi.ListPublishersResponseObject, error) {
 	return oapi.ListPublishersdefaultJSONResponse{
 		Body:       adaptor.NewError((fmt.Errorf("unimplemented"))),
 		StatusCode: 404,
@@ -83,7 +83,7 @@ func (_ Unimplemented) SearchPublishers(ctx context.Context, request oapi.Search
 	}, nil
 }
 
-func (_ Unimplemented) CreateMasterBook(ctx context.Context, request oapi.CreateBookRequestObject) (oapi.CreateBookResponseObject, error) {
+func (_ Unimplemented) CreateMasterBook(ctx context.Context, request oapi.CreateMasterBookRequestObject) (oapi.CreateMasterBookResponseObject, error) {
 	return oapi.CreateMasterBookdefaultJSONResponse{
 		Body:       adaptor.NewError((fmt.Errorf("unimplemented"))),
 		StatusCode: 500,
