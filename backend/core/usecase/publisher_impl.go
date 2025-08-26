@@ -62,12 +62,17 @@ func (u *publisher) Create(ctx context.Context, in input.CreatePublisher) (*outp
 }
 
 // GetByID は指定されたIDの出版社を取得
-func (u *publisher) GetByID(ctx context.Context, publisherID int64) (*output.GetPublisher, error) {
+func (u *publisher) GetByID(ctx context.Context, in input.GetPublisherByID) (*output.GetPublisher, error) {
+	// 入力値のバリデーション
+	if err := in.Validate(); err != nil {
+		return nil, err
+	}
+
 	// queryのGetByIDを呼び出し（SELECT実行）
 	// なぜquery？：データ取得はqueryの責任
 	// null.Int64From：null許容型に変換（DBのNULL対応）
 	publisher, err := u.publisherQuery.GetByID(ctx, query.PublisherGetQuery{
-		ID: null.Int64From(publisherID),
+		ID: null.Int64From(in.ID),
 	}, true) // orFail: trueは必須データ（見つからない場合エラー）
 	if err != nil {
 		return nil, err
