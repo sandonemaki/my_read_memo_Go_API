@@ -43,3 +43,27 @@ func (h Core) CreatePublisher(ctx context.Context, request oapi.CreatePublisherR
 	return oapi.CreatePublisher201JSONResponse{Publisher: output}, nil
 
 }
+
+func (h Core) ListPublishers(ctx context.Context, request oapi.ListPublishersRequestObject) (oapi.ListPublishersResponseObject, error) {
+	var output []oapi.Publisher
+	if err := WithTx(ctx, h.Logger, func(ctx context.Context) error {
+		input := input.NewListPublisher()
+	})
+	_, err := h.publisherUsecase.List(ctx, input)
+	if err != nil {
+		return err
+	}
+
+	output = adaptor.NewPublishers(response.Publishers)
+
+	return nil
+}
+
+	return oapi.ListPublishers200JSONResponse{Publishers: output}, nil
+}
+
+func (h Core) GetPublisherById(ctx context.Context, request oapi.GetPublisherByIdRequestObject) (oapi.GetPublisherByIdResponseObject, error) {
+	var output oapi.Publisher
+	return oapi.GetPublisherById200JSONResponse{Publisher: output}, nil
+}
+
