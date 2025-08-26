@@ -9,6 +9,7 @@ import (
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/query"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/db"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/dbmodels"
+	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/errof"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/psql/dialect"
 )
@@ -39,8 +40,8 @@ func (r *author) GetByID(ctx context.Context, query query.AuthorGetQuery, orFail
 		if errors.Is(err, sql.ErrNoRows) {
 			// orFailパラメータで動作を制御
 			if orFail {
-				// orFail=true: データが必須なのでエラーを返す
-				return nil, err
+				// orFail=true: データが必須なのでNotFoundErrを返す
+				return nil, errof.ErrAuthorNotFound
 			}
 			// orFail=false: データがなくてもOK、nilを返す（エラーではない）
 			return nil, nil

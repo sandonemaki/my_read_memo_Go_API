@@ -1013,22 +1013,16 @@ func (response ListAuthors200JSONResponse) VisitListAuthorsResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListAuthors401Response = UnauthorizedResponse
-
-func (response ListAuthors401Response) VisitListAuthorsResponse(w http.ResponseWriter) error {
-	w.WriteHeader(401)
-	return nil
+type ListAuthorsdefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
 }
 
-type ListAuthors500JSONResponse struct {
-	InternalServerErrorJSONResponse
-}
-
-func (response ListAuthors500JSONResponse) VisitListAuthorsResponse(w http.ResponseWriter) error {
+func (response ListAuthorsdefaultJSONResponse) VisitListAuthorsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
+	w.WriteHeader(response.StatusCode)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type CreateAuthorRequestObject struct {
@@ -1108,22 +1102,16 @@ func (response GetAuthorById200JSONResponse) VisitGetAuthorByIdResponse(w http.R
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetAuthorById404Response = NotFoundResponse
-
-func (response GetAuthorById404Response) VisitGetAuthorByIdResponse(w http.ResponseWriter) error {
-	w.WriteHeader(404)
-	return nil
+type GetAuthorByIddefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
 }
 
-type GetAuthorById500JSONResponse struct {
-	InternalServerErrorJSONResponse
-}
-
-func (response GetAuthorById500JSONResponse) VisitGetAuthorByIdResponse(w http.ResponseWriter) error {
+func (response GetAuthorByIddefaultJSONResponse) VisitGetAuthorByIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
+	w.WriteHeader(response.StatusCode)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type ListMasterBooksRequestObject struct {
@@ -1144,22 +1132,16 @@ func (response ListMasterBooks200JSONResponse) VisitListMasterBooksResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListMasterBooks401Response = UnauthorizedResponse
-
-func (response ListMasterBooks401Response) VisitListMasterBooksResponse(w http.ResponseWriter) error {
-	w.WriteHeader(401)
-	return nil
+type ListMasterBooksdefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
 }
 
-type ListMasterBooks500JSONResponse struct {
-	InternalServerErrorJSONResponse
-}
-
-func (response ListMasterBooks500JSONResponse) VisitListMasterBooksResponse(w http.ResponseWriter) error {
+func (response ListMasterBooksdefaultJSONResponse) VisitListMasterBooksResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
+	w.WriteHeader(response.StatusCode)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type CreateMasterBookRequestObject struct {
@@ -1239,29 +1221,16 @@ func (response GetMasterBookById200JSONResponse) VisitGetMasterBookByIdResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetMasterBookById401Response = UnauthorizedResponse
-
-func (response GetMasterBookById401Response) VisitGetMasterBookByIdResponse(w http.ResponseWriter) error {
-	w.WriteHeader(401)
-	return nil
+type GetMasterBookByIddefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
 }
 
-type GetMasterBookById404Response = NotFoundResponse
-
-func (response GetMasterBookById404Response) VisitGetMasterBookByIdResponse(w http.ResponseWriter) error {
-	w.WriteHeader(404)
-	return nil
-}
-
-type GetMasterBookById500JSONResponse struct {
-	InternalServerErrorJSONResponse
-}
-
-func (response GetMasterBookById500JSONResponse) VisitGetMasterBookByIdResponse(w http.ResponseWriter) error {
+func (response GetMasterBookByIddefaultJSONResponse) VisitGetMasterBookByIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
+	w.WriteHeader(response.StatusCode)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type UpdateMasterBookRequestObject struct {
@@ -1312,22 +1281,16 @@ func (response ListPublishers200JSONResponse) VisitListPublishersResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListPublishers401Response = UnauthorizedResponse
-
-func (response ListPublishers401Response) VisitListPublishersResponse(w http.ResponseWriter) error {
-	w.WriteHeader(401)
-	return nil
+type ListPublishersdefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
 }
 
-type ListPublishers500JSONResponse struct {
-	InternalServerErrorJSONResponse
-}
-
-func (response ListPublishers500JSONResponse) VisitListPublishersResponse(w http.ResponseWriter) error {
+func (response ListPublishersdefaultJSONResponse) VisitListPublishersResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
+	w.WriteHeader(response.StatusCode)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type CreatePublisherRequestObject struct {
@@ -1407,22 +1370,16 @@ func (response GetPublisherById200JSONResponse) VisitGetPublisherByIdResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetPublisherById404Response = NotFoundResponse
-
-func (response GetPublisherById404Response) VisitGetPublisherByIdResponse(w http.ResponseWriter) error {
-	w.WriteHeader(404)
-	return nil
+type GetPublisherByIddefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
 }
 
-type GetPublisherById500JSONResponse struct {
-	InternalServerErrorJSONResponse
-}
-
-func (response GetPublisherById500JSONResponse) VisitGetPublisherByIdResponse(w http.ResponseWriter) error {
+func (response GetPublisherByIddefaultJSONResponse) VisitGetPublisherByIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
+	w.WriteHeader(response.StatusCode)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type DeleteMeRequestObject struct {
@@ -1440,29 +1397,16 @@ func (response DeleteMe204Response) VisitDeleteMeResponse(w http.ResponseWriter)
 	return nil
 }
 
-type DeleteMe401Response = UnauthorizedResponse
-
-func (response DeleteMe401Response) VisitDeleteMeResponse(w http.ResponseWriter) error {
-	w.WriteHeader(401)
-	return nil
+type DeleteMedefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
 }
 
-type DeleteMe404Response = NotFoundResponse
-
-func (response DeleteMe404Response) VisitDeleteMeResponse(w http.ResponseWriter) error {
-	w.WriteHeader(404)
-	return nil
-}
-
-type DeleteMe500JSONResponse struct {
-	InternalServerErrorJSONResponse
-}
-
-func (response DeleteMe500JSONResponse) VisitDeleteMeResponse(w http.ResponseWriter) error {
+func (response DeleteMedefaultJSONResponse) VisitDeleteMeResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
+	w.WriteHeader(response.StatusCode)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type GetMeRequestObject struct {
@@ -1481,22 +1425,16 @@ func (response GetMe200JSONResponse) VisitGetMeResponse(w http.ResponseWriter) e
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetMe401Response = UnauthorizedResponse
-
-func (response GetMe401Response) VisitGetMeResponse(w http.ResponseWriter) error {
-	w.WriteHeader(401)
-	return nil
+type GetMedefaultJSONResponse struct {
+	Body       Error
+	StatusCode int
 }
 
-type GetMe500JSONResponse struct {
-	InternalServerErrorJSONResponse
-}
-
-func (response GetMe500JSONResponse) VisitGetMeResponse(w http.ResponseWriter) error {
+func (response GetMedefaultJSONResponse) VisitGetMeResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
+	w.WriteHeader(response.StatusCode)
 
-	return json.NewEncoder(w).Encode(response)
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type UpdateMeRequestObject struct {

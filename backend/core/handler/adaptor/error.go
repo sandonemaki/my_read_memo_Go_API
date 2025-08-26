@@ -14,6 +14,8 @@ func NewError(err error) oapi.Error {
 	switch e := errors.Cause(err).(type) {
 	case errof.BadRequestErr:
 		code = string(e)
+	case errof.NotFoundErr:
+		code = string(e)
 	case errof.InternalErr:
 		code = string(e)
 	default:
@@ -29,6 +31,8 @@ func ErrorToStatusCode(err error) int {
 	switch errors.Cause(err).(type) {
 	case errof.BadRequestErr:
 		return http.StatusBadRequest
+	case errof.NotFoundErr:
+		return http.StatusNotFound
 	case errof.InternalErr:
 		return http.StatusInternalServerError
 	}

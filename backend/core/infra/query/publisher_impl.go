@@ -9,6 +9,7 @@ import (
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/query"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/db"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/dbmodels"
+	"github.com/sandonemaki/my_read_memo_Go_API/backend/pkg/errof"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/psql/dialect"
 )
@@ -58,9 +59,9 @@ func (p *publisher) GetByID(ctx context.Context, query query.PublisherGetQuery, 
 	if err != nil {
 		// レコードが見つからない場合の処理
 		if errors.Is(err, sql.ErrNoRows) {
-			// orFailがtrueの場合はエラーを返す
+			// orFailがtrueの場合はNotFoundErrを返す
 			if orFail {
-				return nil, err
+				return nil, errof.ErrPublisherNotFound
 			}
 			// orFailがfalseの場合はnilを返す（エラーとしない）
 			return nil, nil
