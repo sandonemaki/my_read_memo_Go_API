@@ -48,10 +48,10 @@ var InternalErrCodeNames = map[InternalErr]string{
 
 // NotFoundErrCodeNames maps NotFoundErr to Japanese error messages
 var NotFoundErrCodeNames = map[NotFoundErr]string{
-	ErrDataNotFound:     "データが見つかりません",
-	ErrUserNotFound:     "ユーザーが見つかりません",
+	ErrDataNotFound:      "データが見つかりません",
+	ErrUserNotFound:      "ユーザーが見つかりません",
 	ErrPublisherNotFound: "出版社が見つかりません",
-	ErrAuthorNotFound:   "著者が見つかりません",
+	ErrAuthorNotFound:    "著者が見つかりません",
 }
 
 // Bad Request errors (400-series)
@@ -62,10 +62,10 @@ var (
 
 // Not Found errors (404)
 var (
-	ErrDataNotFound     NotFoundErr = "ErrDataNotFound"
-	ErrUserNotFound     NotFoundErr = "ErrUserNotFound"
-	ErrPublisherNotFound NotFoundErr = "PublisherNotFound"
-	ErrAuthorNotFound   NotFoundErr = "AuthorNotFound"
+	ErrDataNotFound      NotFoundErr = "ErrDataNotFound"
+	ErrUserNotFound      NotFoundErr = "ErrUserNotFound"
+	ErrPublisherNotFound NotFoundErr = "ErrPublisherNotFound"
+	ErrAuthorNotFound    NotFoundErr = "ErrAuthorNotFound"
 )
 
 // Internal errors (500-series)
