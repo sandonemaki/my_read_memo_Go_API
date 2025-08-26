@@ -40,8 +40,8 @@ func (r *author) GetByID(ctx context.Context, query query.AuthorGetQuery, orFail
 		if errors.Is(err, sql.ErrNoRows) {
 			// orFailパラメータで動作を制御
 			if orFail {
-				// orFail=true: データが必須なのでエラーを返す
-				return nil, errof.NotFoundErr("AuthorNotFound")
+				// orFail=true: データが必須なのでNotFoundErrを返す
+				return nil, errof.ErrAuthorNotFound
 			}
 			// orFail=false: データがなくてもOK、nilを返す（エラーではない）
 			return nil, nil

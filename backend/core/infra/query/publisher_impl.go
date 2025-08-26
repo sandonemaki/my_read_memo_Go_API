@@ -59,9 +59,9 @@ func (p *publisher) GetByID(ctx context.Context, query query.PublisherGetQuery, 
 	if err != nil {
 		// レコードが見つからない場合の処理
 		if errors.Is(err, sql.ErrNoRows) {
-			// orFailがtrueの場合はエラーを返す
+			// orFailがtrueの場合はNotFoundErrを返す
 			if orFail {
-				return nil, errof.NotFoundErr("PublisherNotFound")
+				return nil, errof.ErrPublisherNotFound
 			}
 			// orFailがfalseの場合はnilを返す（エラーとしない）
 			return nil, nil
