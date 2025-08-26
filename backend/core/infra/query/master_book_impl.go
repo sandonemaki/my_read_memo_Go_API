@@ -67,5 +67,5 @@ func (m *masterBook) GetByID(ctx context.Context, query query.MasterBookGetQuery
 
 func (m *masterBook) List(ctx context.Context) ([]*model.MasterBook, error) {
 	// TODO:実装
-	return nil, errors.New("masterBook.GetByID not implemented")
+	return nil, errors.New("masterBook.List not implemented")
 }
