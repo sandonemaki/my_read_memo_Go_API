@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"errors"
 
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/model"
 	"github.com/sandonemaki/my_read_memo_Go_API/backend/core/domain/query"
@@ -61,10 +62,10 @@ func (m *masterBook) Search(ctx context.Context, query query.MasterBookSearchQue
 
 func (m *masterBook) GetByID(ctx context.Context, query query.MasterBookGetQuery, orFail bool) (*model.MasterBook, error) {
 	// TODO:実装
-	return nil, nil
+	return nil, errors.New("masterBook.GetByID not implemented")
 }
 
 func (m *masterBook) List(ctx context.Context) ([]*model.MasterBook, error) {
 	// TODO:実装
-	return nil, nil
+	return nil, errors.New("masterBook.GetByID not implemented")
 }
