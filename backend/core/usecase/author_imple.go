@@ -44,9 +44,14 @@ func (a *author) Create(ctx context.Context, in input.CreateAuthor) (*output.Cre
 	return output.NewCreateAuthor(author), nil
 }
 
-func (a *author) GetByID(ctx context.Context, authorID int64) (*output.GetAuthor, error) {
+func (a *author) GetByID(ctx context.Context, in input.GetAuthorByID) (*output.GetAuthor, error) {
+	// 入力値のバリデーション
+	if err := in.Validate(); err != nil {
+		return nil, err
+	}
+	
 	author, err := a.authorQuery.GetByID(ctx, query.AuthorGetQuery{
-		ID: null.Int64From(authorID),
+		ID: null.Int64From(in.ID),
 	}, true)
 	if err != nil {
 		return nil, err

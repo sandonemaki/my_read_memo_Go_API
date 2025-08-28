@@ -9,7 +9,7 @@ import (
 
 type Author interface {
 	Create(ctx context.Context, in input.CreateAuthor) (out *output.CreateAuthor, err error)
-	GetByID(ctx context.Context, authorID int64) (out *output.GetAuthor, err error)
+	GetByID(ctx context.Context, in input.GetAuthorByID) (out *output.GetAuthor, err error)
 	List(ctx context.Context) (out *output.ListAuthors, err error)
 	SearchByName(ctx context.Context, name string) (out *output.ListAuthors, err error)
 }
