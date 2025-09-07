@@ -12,6 +12,7 @@ type Publisher interface {
 	List(ctx context.Context) (output []*model.Publisher, err error)
 	// GetByID returns the publisher with the given ID.
 	GetByID(ctx context.Context, query PublisherGetQuery, orFail bool) (output *model.Publisher, err error)
+	GetByName(ctx context.Context, name string, orFail bool) (output *model.Publisher, err error)
 }
 
 type PublisherGetQuery struct {

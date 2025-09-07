@@ -12,6 +12,7 @@ type Author interface {
 	List(ctx context.Context) (output []*model.Author, err error)
 	// GetByID returns the author with the given ID.
 	GetByID(ctx context.Context, query AuthorGetQuery, orFail bool) (output *model.Author, err error)
+	GetByName(ctx context.Context, name string, orFail bool) (output *model.Author, err error)
 }
 
 type AuthorGetQuery struct {

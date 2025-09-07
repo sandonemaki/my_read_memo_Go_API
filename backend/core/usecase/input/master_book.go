@@ -1,6 +1,7 @@
 package input
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/pkg/errors"
@@ -34,4 +35,11 @@ func (p *CreateMasterBook) Validate() error {
 		return errors.Wrap(errof.ErrInvalidRequest, err.Error())
 	}
 	return nil
+}
+
+func (c *CreateMasterBook) GetPublishedAt() sql.Null[time.Time] {
+	return sql.Null[time.Time]{
+		V:     c.PublishedAt,
+		Valid: true,
+	}
 }
