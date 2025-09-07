@@ -7,6 +7,6 @@ import (
 )
 
 type MasterBook interface {
-	Create(ctx context.Context, book *model.MasterBook) (err error)
+	Create(ctx context.Context, book *model.MasterBook) (bookID int64, err error)
 	Update(ctx context.Context, book *model.MasterBook) (bookID int64, err error)
 }
