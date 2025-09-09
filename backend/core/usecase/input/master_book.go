@@ -43,3 +43,7 @@ func (c *CreateMasterBook) GetPublishedAt() sql.Null[time.Time] {
 		Valid: true,
 	}
 }
+
+func (c *CreateMasterBook) GetTotalPage() int32 {
+	return int32(c.TotalPages)
+}

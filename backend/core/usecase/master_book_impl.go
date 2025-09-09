@@ -47,7 +47,7 @@ func (u *masterBook) Create(ctx context.Context, in input.CreateMasterBook) (out
 		AuthorID:    author.ID,    // 取得したID
 		PublisherID: publisher.ID, // 取得したID
 		CoverS3URL:  in.CoverS3URL,
-		TotalPage:   int32(in.TotalPages),
+		TotalPage:   in.GetTotalPage(),
 		PublishedAt: in.GetPublishedAt(),
 	}
 	masterBookID, err := u.masterBookRepo.Create(ctx, masterBook)
